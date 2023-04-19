@@ -20,26 +20,32 @@ class GridPoint {
 
 public:
 	GridPoint() { }
+	// Get values from GridPoint
 	inline const Vec3& getPosition() const { return position; }
 	inline float getWeight(int i) { return weight[i]; }
 	inline float getWeight_Iter(int i) { return weight_iter[i]; }
-	inline int getRecNum() {return rec_num;}
-    inline const Vec3& getVelocity(int i) const { return velocity[i]; }
 	inline int getIndex(int i) {return SFD_index[i];}
+	inline const Vec3& getVelocity(int i) const { return velocity[i]; }
+	inline int getRecNum() {return rec_num;}
 
+	// Setters 
 	inline void setPosition(const Vec3& p) { position = p; }
-
-	inline void insertWeight(float w) {weight.push_back(w);}
-	inline void insertWeight_Iter(float w) {weight_iter.push_back(w);}
-	inline void insertIndex(int p) {SFD_index.push_back(p);}
-	inline void insertVelocity(const Vec3& p) { velocity.push_back(p); }
-	inline void addRecord(){rec_num+=1;}
-	inline void setRecord(int p) {rec_num = p;}
-
 	inline void setWeight(float w, int i) { weight[i] = w; }
 	inline void setWeight_Iter(float w, int i) { weight_iter[i] = w; }
 	inline void setVelocity(const Vec3& p,int i) { velocity[i] = p; }
 	inline void setIndex(int w, int i) { SFD_index[i] = w; }
+	inline void setRecord(int p) {rec_num = p;}
+
+	// Inserts
+	inline void insertWeight(float w) {weight.push_back(w);}
+	inline void insertWeight_Iter(float w) {weight_iter.push_back(w);}
+	inline void insertIndex(int p) {SFD_index.push_back(p);}
+	inline void insertVelocity(const Vec3& p) { velocity.push_back(p); }
+
+	// Adds one to the record counter
+	inline void addRecord(){rec_num+=1;}
+
+	// Prints out everything that is stored in the k-th position of the GridPoint
 	inline void printReport(int k) {printf("x = %f, y = %f, z = %f, vx = %f, vy = %f, vz = %f, weight: %f, weight_iter: %f, SFD_index: %d\n", position.x,position.y,position.z,velocity[k].x,velocity[k].y,velocity[k].z,weight[k],weight_iter[k],SFD_index[k]);}
 
 
