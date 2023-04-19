@@ -139,28 +139,28 @@ void Initialize_Outputs(){
 	Initialize_2D_Array(My_Outputs.disk_profile_edge_on_massloss,xdim,ydim);
 	Initialize_1D_Array(My_Outputs.disk_profile_radial_massloss,10000);
 
-	cout << "Check Output Size:" << std::endl;
- 	cout << "Profile 1 size: " << My_Outputs.disk_profile_face_on_number.size() 			<< "\t" << My_Outputs.disk_profile_face_on_number[0].size()			<< std::endl;
-	cout << "Profile 2 size: " << My_Outputs.disk_profile_face_on_brightness.size()		<< "\t" << My_Outputs.disk_profile_face_on_brightness[0].size()		<< std::endl;
-	cout << "Profile 3 size: " << My_Outputs.disk_profile_face_on_impact_velocity.size()	<< "\t" << My_Outputs.disk_profile_face_on_impact_velocity[0].size()	<< std::endl;
-	cout << "Profile 4 size: " << My_Outputs.disk_profile_edge_on_number.size()			<< "\t" << My_Outputs.disk_profile_edge_on_number[0].size()			<< std::endl;
-	cout << "Profile 5 size: " << My_Outputs.disk_profile_edge_on_brightness.size()		<< "\t" << My_Outputs.disk_profile_edge_on_brightness[0].size()		<< std::endl;
-	cout << "Profile 6 size: " << My_Outputs.disk_profile_edge_on_impact_velocity.size()	<< "\t" << My_Outputs.disk_profile_edge_on_impact_velocity[0].size()	<< std::endl;
+	::cout << "Check Output Size:" << std::endl;
+ 	::cout << "Profile 1 size: " << My_Outputs.disk_profile_face_on_number.size() 			<< "\t" << My_Outputs.disk_profile_face_on_number[0].size()			<< std::endl;
+	::cout << "Profile 2 size: " << My_Outputs.disk_profile_face_on_brightness.size()		<< "\t" << My_Outputs.disk_profile_face_on_brightness[0].size()		<< std::endl;
+	::cout << "Profile 3 size: " << My_Outputs.disk_profile_face_on_impact_velocity.size()	<< "\t" << My_Outputs.disk_profile_face_on_impact_velocity[0].size()	<< std::endl;
+	::cout << "Profile 4 size: " << My_Outputs.disk_profile_edge_on_number.size()			<< "\t" << My_Outputs.disk_profile_edge_on_number[0].size()			<< std::endl;
+	::cout << "Profile 5 size: " << My_Outputs.disk_profile_edge_on_brightness.size()		<< "\t" << My_Outputs.disk_profile_edge_on_brightness[0].size()		<< std::endl;
+	::cout << "Profile 6 size: " << My_Outputs.disk_profile_edge_on_impact_velocity.size()	<< "\t" << My_Outputs.disk_profile_edge_on_impact_velocity[0].size()	<< std::endl;
 
 }
 
 void Initiate_Output_Files(){
 	FILE * pFile_temp;
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Number","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Brightness","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Impact_Velocity","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Number","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Brightness","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Impact_Velocity","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Mass_Accreted_Kessler","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_MassLoss","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_MassLoss","w+"); fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Radial_MassLoss","w+"); fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Number","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Brightness","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Impact_Velocity","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Number","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Brightness","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Impact_Velocity","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Mass_Accreted_Kessler","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_MassLoss","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_MassLoss","w+"); ::fclose(pFile_temp);
+	pFile_temp = fopen("Outputs_Disk_Profile_Radial_MassLoss","w+"); ::fclose(pFile_temp);
 }
 
 void Print_Outputs_Big(int file_counter, double refactor = 1.0){
@@ -173,33 +173,33 @@ int z = peterito->data[0][0].size();
 FILE * pFile_temp;
 
 pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Number","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_number[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_number[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_number[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_number[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Brightness","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_brightness[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_brightness[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_brightness[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_brightness[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Impact_Velocity","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_number[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_impact_velocity[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);	
+for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_number[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_impact_velocity[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);	
 
 pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Number","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_number[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_number[i][j]*refactor, file_counter );	} }; } fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_number[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_number[i][j]*refactor, file_counter );	} }; } ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Brightness","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_brightness[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_brightness[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_brightness[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_brightness[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Impact_Velocity","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_number[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_impact_velocity[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_number[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_impact_velocity[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 /// 
 pFile_temp = fopen("Outputs_Disk_Profile_Face_On_MassLoss","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_massloss[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_massloss[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<y; ++j){	if(My_Outputs.disk_profile_face_on_massloss[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_face_on_massloss[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_MassLoss","a+");
-for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_massloss[i][j] >0.0) {fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_massloss[i][j]*refactor, file_counter );}	} };  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+for (int i=0;i<x; ++i){	for (int j=0;j<z; ++j){	if(My_Outputs.disk_profile_edge_on_massloss[i][j] >0.0) {::fprintf(pFile_temp,"%.5f %.5f %13.5e %d \n", dr[0]+i*2.0*dr[0]-octree_limit,dr[1]+j*2.0*dr[1]-octree_limit, My_Outputs.disk_profile_edge_on_massloss[i][j]*refactor, file_counter );}	} };  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 
 pFile_temp = fopen("Outputs_Disk_Profile_Radial_MassLoss","a+");
-// for (int i=0;i<(int)My_Outputs.disk_profile_radial_massloss.size(); ++i){if(My_Outputs.disk_profile_radial_massloss[i] >0.0) {fprintf(pFile_temp,"%.5f %13.5e %d\n", i*dr.x*2.0+dr.x,My_Outputs.disk_profile_radial_massloss[i]*refactor, file_counter );}	} ;  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
-for (int i=0;i<(int)My_Outputs.disk_profile_radial_massloss.size(); ++i){if(My_Outputs.disk_profile_radial_massloss[i] >0.0) {fprintf(pFile_temp,"%.5f %13.5e %d\n", (i+0.5) * ( octree_limit) / (float)My_Outputs.disk_profile_radial_massloss.size() ,My_Outputs.disk_profile_radial_massloss[i]*refactor, file_counter );}	} ;  fprintf(pFile_temp,"\n");	fclose(pFile_temp);
+// for (int i=0;i<(int)My_Outputs.disk_profile_radial_massloss.size(); ++i){if(My_Outputs.disk_profile_radial_massloss[i] >0.0) {::fprintf(pFile_temp,"%.5f %13.5e %d\n", i*dr.x*2.0+dr.x,My_Outputs.disk_profile_radial_massloss[i]*refactor, file_counter );}	} ;  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
+for (int i=0;i<(int)My_Outputs.disk_profile_radial_massloss.size(); ++i){if(My_Outputs.disk_profile_radial_massloss[i] >0.0) {::fprintf(pFile_temp,"%.5f %13.5e %d\n", (i+0.5) * ( octree_limit) / (float)My_Outputs.disk_profile_radial_massloss.size() ,My_Outputs.disk_profile_radial_massloss[i]*refactor, file_counter );}	} ;  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
 }
 
 
@@ -214,7 +214,7 @@ int z = peterito->data[0][0].size();
 FILE * pFile_temp;
 
 pFile_temp = fopen("Outputs_Mass_Accreted_Kessler","a+");
-fprintf(pFile_temp,"%13.5e %d \n", mass_accreted_at_Earth*refactor, file_counter);fclose(pFile_temp);
+::fprintf(pFile_temp,"%13.5e %d \n", mass_accreted_at_Earth*refactor, file_counter);::fclose(pFile_temp);
 }
 
 void Zero_Outputs(){
@@ -322,7 +322,7 @@ int find_diameter_index(float diameter)	{
 			return i;
 		} 
 	}
-	cout << "Error finding dimameters, something is terribly wrong, this should not happen at all! --- function int find_diameter_index(float diameter)\n";
+	::cout << "Error finding dimameters, something is terribly wrong, this should not happen at all! --- function int find_diameter_index(float diameter)\n";
 	exit(EXIT_FAILURE);
 	return 999;
 }
@@ -430,19 +430,19 @@ void addOctreePoint(Octree *octree_insert, Vec3 point,float weight,int index,Vec
 
 void checkRadialProfile(FILE * pFile_w, std::vector<double> &r_prof,int counter, float reweighting_factor = 1.0){
 	for (int i=0;i<(int)r_prof.size(); ++i){
-		if(r_prof[i]>0) {fprintf(pFile_w,"%.5f %13.5e %d %13.5e\n", i*dr.x*2.0+dr.x, r_prof[i]*reweighting_factor, counter, r_prof_brightness[i]*reweighting_factor );}
+		if(r_prof[i]>0) {::fprintf(pFile_w,"%.5f %13.5e %d %13.5e\n", i*dr.x*2.0+dr.x, r_prof[i]*reweighting_factor, counter, r_prof_brightness[i]*reweighting_factor );}
 	}
 }
 
 void checkEclipticProfile(FILE * pFile_w, std::vector<double> &ecl_prof, std::vector<double> &ecl_prof_mass, int counter, float reweighting_factor = 1.0){
 	for (int i=0;i<(int)ecl_prof.size(); ++i){
-		fprintf(pFile_w,"%.5f %13.5e %13.5e %d \n", float(i-89.5), ecl_prof[i]*reweighting_factor ,ecl_prof_mass[i]*reweighting_factor, counter );
+		::fprintf(pFile_w,"%.5f %13.5e %13.5e %d \n", float(i-89.5), ecl_prof[i]*reweighting_factor ,ecl_prof_mass[i]*reweighting_factor, counter );
 	}
 }
 
 void checkSFDProfile(FILE * pFile_w, std::vector<double> &SFD_profile, int counter, float reweighting_factor = 1.0){
 	for (int i=0;i<(int)SFD_profile.size(); ++i){
-		fprintf(pFile_w,"%.5f %13.5e  %d  %13.5e\n", SFD_array[i][0], SFD_profile[i]*reweighting_factor, counter, SFD_profile_Kessler[i]*reweighting_factor );
+		::fprintf(pFile_w,"%.5f %13.5e  %d  %13.5e\n", SFD_array[i][0], SFD_profile[i]*reweighting_factor, counter, SFD_profile_Kessler[i]*reweighting_factor );
 	}
 }
 
@@ -453,12 +453,12 @@ float getRadialDifference(std::vector<double> &r_prof1,std::vector<double> &r_pr
 	for (int k=3;k<(int)r_prof1.size() ;++k){
 	 // radial_difference += pow(r_prof1[k]-r_prof2[k],2);
 		if(r_prof1[k]>0.0 && r_prof2[k]>0.0){
-			// printf("DEBUG INSIDE: iter: %d, radial_difference %.5e, temp_calc: %.5e, cntr: %.5e, array 1: %.5e, array 2: %.5e\n", k, radial_difference, r_prof2[k]/r_prof1[k]-1.0,cntr,r_prof1[k],r_prof2[k]);
+			// ::printf("DEBUG INSIDE: iter: %d, radial_difference %.5e, temp_calc: %.5e, cntr: %.5e, array 1: %.5e, array 2: %.5e\n", k, radial_difference, r_prof2[k]/r_prof1[k]-1.0,cntr,r_prof1[k],r_prof2[k]);
 			radial_difference = std::max(r_prof2[k]/r_prof1[k],r_prof1[k]/r_prof2[k]);
 			if(max_diff<radial_difference) { max_diff=radial_difference;}
 		}
 	}
-		// printf("DEBUG: radial_difference %.5e, cntr: %.5e\n", radial_difference,cntr);
+		// ::printf("DEBUG: radial_difference %.5e, cntr: %.5e\n", radial_difference,cntr);
 		return max_diff-1.0;
 }
 
@@ -529,7 +529,7 @@ void getCollProbWithEarth(Vec3 r_vec, Vec3 v_vec, Vec3 r_pl_vec, Vec3 v_pl_vec, 
 
 	inc = acos(sqrt(cos2i))*180.0/M_PI;
 
-	// printf("KESSLER TEST: v_rel = %13.5e, a = %13.5e, e = %13.5e, inc = %13.5e, v_pl = %13.5e, v_par = %13.5e, cosgamma = %13.5e, cosphi = %13.5e\n", v_rel, a/au, e, inc, v_pl, v_par_target, cosgamma, cosphi);
+	// ::printf("KESSLER TEST: v_rel = %13.5e, a = %13.5e, e = %13.5e, inc = %13.5e, v_pl = %13.5e, v_par = %13.5e, cosgamma = %13.5e, cosphi = %13.5e\n", v_rel, a/au, e, inc, v_pl, v_par_target, cosgamma, cosphi);
 	// cin >> pinkevic;
 
 // // TESTING
@@ -552,10 +552,10 @@ void getCollProbWithEarth(Vec3 r_vec, Vec3 v_vec, Vec3 r_pl_vec, Vec3 v_pl_vec, 
 	if(!isnormal(prob)){ 
 		prob = 0.0;
 		prob_unfoc = 0.0;
-		printf("Problem with the prob:\n"); 
-		printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a/1.5e11,e, acos(sqrt(cos2i))*180.0/M_PI,v_rel, grav_foc , energy, v_pl, v);
-		printf("Method check - prob: %13.5e, cosphi: %13.5e, cosgamma: %13.5e, peri: %13.5e, rpl: %13.5e, apo: %13.5e, H2: %13.5e, HZ2: %13.5e,\n", prob, cosphi,cosgamma,peri,r_pl,apo, H2, HZ2);
-		printf("Method check - x: %13.5e, y: %13.5e, z: %13.5e, vx: %13.5e, vy: %13.5e, vz: %13.5e, H2/GMa: %13.5e, \n", r_vec[0],r_vec[1],r_vec[2],v_vec[0],v_vec[1],v_vec[2],H2/(GM*a));
+		::printf("Problem with the prob:\n"); 
+		::printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a/1.5e11,e, acos(sqrt(cos2i))*180.0/M_PI,v_rel, grav_foc , energy, v_pl, v);
+		::printf("Method check - prob: %13.5e, cosphi: %13.5e, cosgamma: %13.5e, peri: %13.5e, rpl: %13.5e, apo: %13.5e, H2: %13.5e, HZ2: %13.5e,\n", prob, cosphi,cosgamma,peri,r_pl,apo, H2, HZ2);
+		::printf("Method check - x: %13.5e, y: %13.5e, z: %13.5e, vx: %13.5e, vy: %13.5e, vz: %13.5e, H2/GMa: %13.5e, \n", r_vec[0],r_vec[1],r_vec[2],v_vec[0],v_vec[1],v_vec[2],H2/(GM*a));
 	return;
 	}
 
@@ -563,7 +563,7 @@ void getCollProbWithEarth(Vec3 r_vec, Vec3 v_vec, Vec3 r_pl_vec, Vec3 v_pl_vec, 
 
 	// prob can be really small in kms units, but it shouldn't go below 10e-38 in the solar system. Normally this value is above 10e-30 so we have 8 orders of magnitude cushion
 
-	// printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a/1.5e11,e, acos(sqrt(cos2i))*180.0/M_PI,v_rel, grav_foc , energy, v_pl, v);
+	// ::printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a/1.5e11,e, acos(sqrt(cos2i))*180.0/M_PI,v_rel, grav_foc , energy, v_pl, v);
 
 	// TEST_probabilities.push_back(prob);
 
@@ -633,7 +633,7 @@ void calculate_SFD(double alpha,double beta,double Dmid,double Dmax,double N0){
 	average_log_spacing = average_log_spacing/float(unique_diameters.size()-1.0);
 
 
-	// cout << "AVERAGE LOG SPACING \t" << average_log_spacing << "\n";
+	// ::cout << "AVERAGE LOG SPACING \t" << average_log_spacing << "\n";
 
 	 // temporary vector for the mid values
 	temp_diameters.push_back(pow(10.0,log10(unique_diameters[0])-average_log_spacing*0.5)); // ADDING THE FIRST VALUE WHICH IS D-Dstep*0.5 in logscale
@@ -651,9 +651,9 @@ void calculate_SFD(double alpha,double beta,double Dmid,double Dmax,double N0){
 		tmp_number = broken_power_law(alpha,beta,temp_diameters[i],Dmid,Dmax,N0) - broken_power_law(alpha,beta,temp_diameters[i+1],Dmid,Dmax,N0);
 		tmp_mass =  pow(unique_diameters[i],3.0)/6.0*M_PI*particle_density*1e-18;
 		differential_sizes.push_back(tmp_number);
-		cout << i << "\t" << unique_diameters[i] << "\t" <<  tmp_number << "\t" << Integration_Setup_array[i][1] << "\n";
+		::cout << i << "\t" << unique_diameters[i] << "\t" <<  tmp_number << "\t" << Integration_Setup_array[i][1] << "\n";
 		SFD_array.push_back({unique_diameters[i],tmp_number/Integration_Setup_array[i][1],tmp_mass});
-	   // cout << i << "\t" << unique_diameters[i] << "\t" <<  tmp_number << "\t" << temp_diameters[i] << "\t" << temp_diameters[i+1] << "\n";
+	   // ::cout << i << "\t" << unique_diameters[i] << "\t" <<  tmp_number << "\t" << temp_diameters[i] << "\t" << temp_diameters[i+1] << "\n";
 	}
 
 	SFD_profile.resize(unique_diameters.size());
@@ -698,7 +698,7 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector,int iter_count){
 	mu = 1.32712440018e20; // gravitational parameter of the Sun in SI units
 	h = sqrt(mu*a*(1.0-e*e));
 	V0 = mu/h; // Circular velocity in meters per second
-	// cout << V0 << "\n";
+	// ::cout << V0 << "\n";
 
 	for(int i=0;i<1000;i++){ // steps in the true anomaly
 		mass_accreted=0.0;
@@ -736,7 +736,7 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector,int iter_count){
     		// tau_coll = impactor_weight * particle_cross_section * deltaV * t_record;
 
     		// mass_accreted += particle_number;
-    		// printf("particle_number: %13.5e, diameter: %.5f, particle_mass %13.5e, cross_section %13.5e time_elapsed %13.5e, delta v %13.5e, volume_unit: %13.5e, mass accreted: %13.5e\n", particle_number, SFD_array[dia_index][0], particle_mass ,cross_section , time_elapsed, deltaV, volume_unit, particle_number * particle_mass * cross_section * time_elapsed * deltaV);
+    		// ::printf("particle_number: %13.5e, diameter: %.5f, particle_mass %13.5e, cross_section %13.5e time_elapsed %13.5e, delta v %13.5e, volume_unit: %13.5e, mass accreted: %13.5e\n", particle_number, SFD_array[dia_index][0], particle_mass ,cross_section , time_elapsed, deltaV, volume_unit, particle_number * particle_mass * cross_section * time_elapsed * deltaV);
 
 			}
 
@@ -744,7 +744,7 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector,int iter_count){
 
     	}
     	// results.clear();
-    	fprintf(pFile4,"%d %13.5e %d\n",i,mass_accreted,iter_count);
+    	::fprintf(pFile4,"%d %13.5e %d\n",i,mass_accreted,iter_count);
 		mass_vector.push_back(mass_accreted);
 	}
 
@@ -767,7 +767,7 @@ void load_2D_helper(std::string filename, std::vector<double> &x_vec, std::vecto
 		y_vec.push_back(y_axis);
     }
 
-    } else {cout << "File not found! \t " << filename << "\n";}
+    } else {::cout << "File not found! \t " << filename << "\n";}
 
 }
 
@@ -797,18 +797,18 @@ void copy_and_clear_vector(std::vector<double> &original_vector, std::vector<dou
 		}
 	}
 	else {
-		// printf("Putting Zeros in the vector - before: ");
+		// ::printf("Putting Zeros in the vector - before: ");
 			for(int j=0; j<(int)zeroed_vector.size(); j++) {
 				sum_of_elems+=zeroed_vector[j];
 			}
-		// printf("%13.5e, after: ",sum_of_elems); sum_of_elems = 0.0;
+		// ::printf("%13.5e, after: ",sum_of_elems); sum_of_elems = 0.0;
 
 		std::fill(zeroed_vector.begin(), zeroed_vector.end(), 0.0);
 
 			for(int j=0; j<(int)zeroed_vector.size(); j++) {
 				sum_of_elems+=zeroed_vector[j];
 			}
-		// printf("%13.5e \n",sum_of_elems); sum_of_elems = 0.0;
+		// ::printf("%13.5e \n",sum_of_elems); sum_of_elems = 0.0;
 	}
 
 	// std::copy(original_vector.begin(), original_vector.end(), zeroed_vector.begin()); std::fill(zeroed_vector.begin(), zeroed_vector.end(), 0.0);
@@ -868,8 +868,8 @@ float ecc_lon = abs(atan2(v_apex,v_sun))*rad2deg;
 float ecc_lat = asin(v_z/v_rad)*rad2deg;
 // ecc_lat = atan(v_z/(sqrt(v_apex*v_apex + v_sun*v_sun)));
 //
-// printf("Ecc Lon: %10.3f, Ecc Lat: %10.3f, v_rad: %10.3f, v1: %10.3f, v2: %10.3f, v3: %10.3f  \n", ecc_lon, ecc_lat, v_rad*29.78, v_apex, v_sun, v_z  );
-// printf("a: %10.3f,e: %10.3f,inc: %10.3f,vg: %10.3f  \n", a,e,inc,vg );
+// ::printf("Ecc Lon: %10.3f, Ecc Lat: %10.3f, v_rad: %10.3f, v1: %10.3f, v2: %10.3f, v3: %10.3f  \n", ecc_lon, ecc_lat, v_rad*29.78, v_apex, v_sun, v_z  );
+// ::printf("a: %10.3f,e: %10.3f,inc: %10.3f,vg: %10.3f  \n", a,e,inc,vg );
 
 
 float HE_lon_center = 70.0;
@@ -902,7 +902,7 @@ if( abs(ecc_lon - HE_lon_center) < HE_lon_width && abs(ecc_lat - HE_lat_center) 
 if( abs(ecc_lon - NA_lon_center) < NA_lon_width && abs(ecc_lat - NA_lat_center) < NA_lat_width) { radiant_source_name = "NORTH APEX";}
 if( abs(ecc_lon - NT_lon_center) < NT_lon_width && abs(ecc_lat - NT_lat_center) < NT_lat_width) { radiant_source_name = "NORTH TOROIDAL";}
 
-// printf("Radar test: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); cout << radiant_source_name << std::endl;
+// ::printf("Radar test: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); ::cout << radiant_source_name << std::endl;
 v_radar = sqrt(v_esc*v_esc + vg*vg);
 
 ion_velocity_comp = 1e7*pow((v_radar/30000.0),3.5);
@@ -913,8 +913,8 @@ index_ecc = floor(e/de);
 index_inc = floor(inc/dinc);
 index_vg = floor(vg/dvg);
 
-// printf("Radar profile index:  %d %d %d %d %13.5e\n", index_a, index_ecc, index_inc,index_vg, ion);
-// printf("Radar profile orbs:  %13.5e %13.5e %13.5e %13.5e %13.5e\n", a/au, e, inc, vg, v_radar);
+// ::printf("Radar profile index:  %d %d %d %d %13.5e\n", index_a, index_ecc, index_inc,index_vg, ion);
+// ::printf("Radar profile orbs:  %13.5e %13.5e %13.5e %13.5e %13.5e\n", a/au, e, inc, vg, v_radar);
 // cin >> tester;
 
 // CHANGE - QUICK HACK
@@ -935,13 +935,13 @@ if(radar_name == "CMOR") {
 	meteors_recorded = meteors_N_record*prob;
 	// meteors_N_mid = broken_power_law(alpha,beta,temp_diameters[diameter_index],Dmid,Dmax,N0)/Integration_Setup_array[diameter_index][1];  
 
-	// printf("Power law test: alpha: %.f, beta: %.f, Dmid: %.f, Dmax: %.f, N0: %.f\n", alpha,beta,Dmid,Dmax,N0);
+	// ::printf("Power law test: alpha: %.f, beta: %.f, Dmid: %.f, Dmax: %.f, N0: %.f\n", alpha,beta,Dmid,Dmax,N0);
 	
-	// printf("Radar Test: N_bin: %13.5e, d_max: %13.5e, d_mid: %13.5e, v_radar: %13.5e, N_max: %13.5e, N_mid: %13.5e, N_record: %13.5e\n", SFD_array[diameter_index][1],meteors_d_max, meteors_d_limit, v_radar, meteors_N_max, meteors_N_mid, meteors_N_record);
+	// ::printf("Radar Test: N_bin: %13.5e, d_max: %13.5e, d_mid: %13.5e, v_radar: %13.5e, N_max: %13.5e, N_mid: %13.5e, N_record: %13.5e\n", SFD_array[diameter_index][1],meteors_d_max, meteors_d_limit, v_radar, meteors_N_max, meteors_N_mid, meteors_N_record);
 
 
 
-	// printf("Radar Test 2: N_bin: %13.5e, d_max: %13.5e, d_mid: %13.5e, v_radar: %13.5e, N_max: %13.5e, N_mid: %13.5e, N_record: %13.5e\n", SFD_array[diameter_index][1],meteors_d_max, meteors_d_limit, v_radar, meteors_N_max, meteors_N_mid, meteors_N_record);
+	// ::printf("Radar Test 2: N_bin: %13.5e, d_max: %13.5e, d_mid: %13.5e, v_radar: %13.5e, N_max: %13.5e, N_mid: %13.5e, N_record: %13.5e\n", SFD_array[diameter_index][1],meteors_d_max, meteors_d_limit, v_radar, meteors_N_max, meteors_N_mid, meteors_N_record);
 
 	// cin >> tester;
 
@@ -949,7 +949,7 @@ if(radar_name == "CMOR") {
 	// ion = ion_velocity_comp*SFD_array[diameter_index][2];
 
 	if(radiant_source_name == "HELION") {
-		// printf("Radar test CMOR: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); cout << radiant_source_name << std::endl;
+		// ::printf("Radar test CMOR: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); ::cout << radiant_source_name << std::endl;
 		if(index_a < (int)My_Measurements.CMOR_AH_a_y.size()) My_Measurements.CMOR_AH_a_y[index_a] += meteors_recorded;
 		if(index_ecc < (int)My_Measurements.CMOR_AH_ecc_y.size()) My_Measurements.CMOR_AH_ecc_y[index_ecc] += meteors_recorded;
 		if(index_inc < (int)My_Measurements.CMOR_AH_inc_y.size()) My_Measurements.CMOR_AH_inc_y[index_inc] += meteors_recorded;
@@ -976,7 +976,7 @@ if(radar_name == "AMOR") {
 	meteors_recorded = meteors_N_record*prob;
 
 	if(radiant_source_name == "HELION") {
-		// printf("Radar test AMOR: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); cout << radiant_source_name << std::endl;
+		// ::printf("Radar test AMOR: ecc_lon: %13.5f,ecc_lat %13.5f, source: ", ecc_lon, ecc_lat); ::cout << radiant_source_name << std::endl;
 		if(index_a < (int)My_Measurements.AMOR_AH_a_y.size()) My_Measurements.AMOR_AH_a_y[index_a] += meteors_recorded;
 		if(index_ecc < (int)My_Measurements.AMOR_AH_ecc_y.size()) My_Measurements.AMOR_AH_ecc_y[index_ecc] += meteors_recorded;
 		if(index_inc < (int)My_Measurements.AMOR_AH_inc_y.size()) My_Measurements.AMOR_AH_inc_y[index_inc] += meteors_recorded;
@@ -984,7 +984,7 @@ if(radar_name == "AMOR") {
 		}
 	}
 
-if(radar_ion_limit > 1e9) {cout << "Error: Incorrect Radar Selected!" << std::endl;}
+if(radar_ion_limit > 1e9) {::cout << "Error: Incorrect Radar Selected!" << std::endl;}
 }
 
 void normalize_vector(std::vector<double> &vector){
@@ -1015,7 +1015,7 @@ void normalize_radar_measurements(){
 void write_radar_profile(FILE * pFile_w, int counter, std::string radar_name){
 	if(radar_name == "CMOR") {
 	for (int i=0;i<(int)My_Measurements.CMOR_AH_a_y.size(); ++i){
-		fprintf(pFile_w,"%.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
+		::fprintf(pFile_w,"%.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
 			My_Constraints.CMOR_AH_a_x[i], My_Measurements.CMOR_AH_a_y[i],
 			My_Constraints.CMOR_AH_ecc_x[i], My_Measurements.CMOR_AH_ecc_y[i],
 			My_Constraints.CMOR_AH_inc_x[i], My_Measurements.CMOR_AH_inc_y[i],
@@ -1025,7 +1025,7 @@ void write_radar_profile(FILE * pFile_w, int counter, std::string radar_name){
 	}
 	if(radar_name == "AMOR") {
 	for (int i=0;i<(int)My_Measurements.AMOR_AH_a_y.size(); ++i){
-		fprintf(pFile_w,"%.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
+		::fprintf(pFile_w,"%.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
 			My_Constraints.AMOR_AH_a_x[i],   My_Measurements.AMOR_AH_a_y[i],
 			My_Constraints.AMOR_AH_ecc_x[i], My_Measurements.AMOR_AH_ecc_y[i],
 			My_Constraints.AMOR_AH_inc_x[i], My_Measurements.AMOR_AH_inc_y[i],
@@ -1085,7 +1085,7 @@ double calculate_cloud_mass(){
 	OctreePoint *results;
 
 
-	// cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
+	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
 
 		for(int i=0; i<(int)peterito->data.size(); i++){
 					for(int j=0; j<(int)peterito->data[0].size(); j++){
@@ -1120,7 +1120,7 @@ double calculate_cloud_area(){
 	OctreePoint *results;
 
 
-	// cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
+	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
 
 		for(int i=0; i<(int)peterito->data.size(); i++){
 					for(int j=0; j<(int)peterito->data[0].size(); j++){
@@ -1204,7 +1204,7 @@ void pre_init(){
 
     myfile.close();
   }
-  else cout << "Unable to open binary file\n"; 
+  else ::cout << "Unable to open binary file\n"; 
 
   // octree->initialize_Second_weights();
 
@@ -1212,7 +1212,7 @@ void pre_init(){
     datafile.close();
 
   }
-  else cout << "Unable to open file - COLL_datafile\n" ;
+  else ::cout << "Unable to open file - COLL_datafile\n" ;
 
 
 
@@ -1235,7 +1235,7 @@ void pre_init(){
   Integration_Setup_array.clear();
   for(int k3=0;k3<(int)unique_diameters.size();k3++){
   Integration_Setup_array.push_back({unique_diameters[k3],tmp_array[k3]});
-  cout << "Diameter check: " << unique_diameters[k3] << "\t" <<tmp_array[k3] << "\n" ;
+  ::cout << "Diameter check: " << unique_diameters[k3] << "\t" <<tmp_array[k3] << "\n" ;
 }
 
 
@@ -1288,7 +1288,7 @@ void init() {
  // int line_width = getenv("COLUMNS") ? atoi(getenv("COLUMNS")) : 80;
 std::string spaces{80 - 1, ' '};
 
-printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio difference = %.5f, initial weights = %.5e\n", angle_diff, acos(angle_diff)*180.0/M_PI,ratio_diff,initial_weight); fflush(stdout);
+::printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio difference = %.5f, initial weights = %.5e\n", angle_diff, acos(angle_diff)*180.0/M_PI,ratio_diff,initial_weight); ::fflush(stdout);
 
   ifstream datafile (work_directory+"/./COLL_datafile");
   if (datafile.is_open())
@@ -1296,7 +1296,7 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
     while ( getline(datafile,line,'\n') )
     {
     readDatafile(line,file_to_load,diameter,pericenter);
-    cout << "Processing - " << file_to_load << ", Diameter: " << diameter << ", Pericenter: " << pericenter <<  ", ";
+    ::cout << "Processing - " << file_to_load << ", Diameter: " << diameter << ", Pericenter: " << pericenter <<  ", ";
     // unique_diameters.push_back(diameter);
     // Integration_Setup_array.push_back({diameter,0.0});
     dia_index = find_diameter_index(diameter);
@@ -1307,10 +1307,10 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
 
       file_to_load=ReplaceAll(file_to_load,std::string(" "), std::string(""));
       cver_datafile = file_to_load.c_str();
-      // printf("|%s|\n|%s|",cdata_file,cver_datafile);fflush(stdout);
+      // ::printf("|%s|\n|%s|",cdata_file,cver_datafile);fflush(stdout);
       // file_to_load.replace( file_to_load.begin(), file_to_load.end(), '\\', '\\\\'); //replace all occurances of 'x' with 'y'
 // file_to_load=ReplaceAll(file_to_load,std::string("/"), std::string("\\\\"));
-// cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
+// ::cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
   ifstream myfile(cver_datafile, ios::in|ios::binary| ios::ate);
 
   // ifstream myfile ("output.small");
@@ -1336,8 +1336,8 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
     if(current_integration_time == time_int) // Here we start reading a new file so we start a new vector etc.
     {
     	particle_weight.push_back(weight);
-    	// printf("Pushed weight - ID: %d, weight: %13.5e, init weight: %13.5e, vector lenght: %lu \n",parID,particle_weight[parID],initial_weight,particle_weight.size()); fflush(stdout); 
-    	while((int)particle_weight.size()<parID)    	{printf("Particle %lu mysteriously missing at the very beginning of the datafile => next particle is %d \n", particle_weight.size(), parID);  particle_weight.push_back(weight);}
+    	// ::printf("Pushed weight - ID: %d, weight: %13.5e, init weight: %13.5e, vector lenght: %lu \n",parID,particle_weight[parID],initial_weight,particle_weight.size()); fflush(stdout); 
+    	while((int)particle_weight.size()<parID)    	{::printf("Particle %lu mysteriously missing at the very beginning of the datafile => next particle is %d \n", particle_weight.size(), parID);  particle_weight.push_back(weight);}
     }
     // ----
 
@@ -1345,7 +1345,7 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
 
     // radialProfile(r_prof_init, point,1.0); // adds the read line to the radial profile "r_prof"
 
-    // printf("TEST: %.5f %.5f %.5f %.5f %.5f %.5f\n", point.x,point.y,point.z,velvec1.x,velvec1.y,velvec1.z); fflush(stdout);
+    // ::printf("TEST: %.5f %.5f %.5f %.5f %.5f %.5f\n", point.x,point.y,point.z,velvec1.x,velvec1.y,velvec1.z); fflush(stdout);
     // cin >> pink;
 
 
@@ -1354,16 +1354,16 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
 	// std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
     res_index = peterito->getIndexes(point); //
     for (int jj=0; jj<3;jj++){
-    if(res_index[jj]>=400 || res_index[jj]<0) cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
+    if(res_index[jj]>=400 || res_index[jj]<0) ::cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
     }
     
     
     // octree->getPointsInsideBox({point.x-dr.x,point.y-dr.y,point.z-dr.z}, {point.x+dr.x,point.y+dr.y,point.z+dr.z}, results); //
-    // cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
+    // ::cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
     results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
 
     if(results->getRecNum()>0){
-    	// cout << results->getRecNum() << '\n'; fflush(stdout);
+    	// ::cout << results->getRecNum() << '\n'; fflush(stdout);
     	rec_iter = results->getRecNum();
     	breakable = 1;
 
@@ -1400,13 +1400,13 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
     } else{
 
     	// addOctreePoint(octree, point,weight,dia_index,velvec1);
-    	// cout << "Inserted Data Before" << results->getRecNum() << "\n";
+    	// ::cout << "Inserted Data Before" << results->getRecNum() << "\n";
     		results->insertWeight(weight);
     		results->insertWeight_Iter(weight);
     		results->insertIndex(dia_index);
     		results->insertVelocity(velvec1);
     		results->addRecord();
-		// cout << "Inserted Data After" << results->getRecNum() << "\n";
+		// ::cout << "Inserted Data After" << results->getRecNum() << "\n";
 
 
     }
@@ -1439,10 +1439,10 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
 	}
 
     myfile.close();
-    printf("Inserted %d points to octree\n",total_number_of_particles_integration); fflush(stdout);
+    ::printf("Inserted %d points to octree\n",total_number_of_particles_integration); ::fflush(stdout);
     file_cntr++;
   }
-  else cout << "Unable to open binary file\n"; 
+  else ::cout << "Unable to open binary file\n"; 
 
   // octree->initialize_Second_weights();
 
@@ -1450,29 +1450,29 @@ printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio d
     datafile.close();
 
   }
-  else cout << "Unable to open file\n" ;
+  else ::cout << "Unable to open file\n" ;
 
 
 
-  printf("Inserted Total of %d points to octree\n",total_number_of_particles_integration); fflush(stdout);
+  ::printf("Inserted Total of %d points to octree\n",total_number_of_particles_integration); ::fflush(stdout);
 
 
 	double initial_cloud_area = calculate_cloud_area();
 	double init_reweight = intended_cloud_area/initial_cloud_area;
-	cout << "Total Cloud Area: " << initial_cloud_area << std::endl;
-	cout << "Reweighting the area of the cloud by a factor " << init_reweight << "New weight:" <<  initial_weight * init_reweight << "\n";
+	::cout << "Total Cloud Area: " << initial_cloud_area << std::endl;
+	::cout << "Reweighting the area of the cloud by a factor " << init_reweight << "New weight:" <<  initial_weight * init_reweight << "\n";
 	initial_weight = initial_weight * init_reweight;
 
 
 
 
-  checkRadialProfile(pFile, r_prof_iter, 0, init_reweight);fprintf(pFile,"\n");
-  checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, 0,init_reweight);fprintf(pFile1,"\n");
-  checkSFDProfile(pFile2, SFD_profile, 0,init_reweight);fprintf(pFile2,"\n");
+  checkRadialProfile(pFile, r_prof_iter, 0, init_reweight);::fprintf(pFile,"\n");
+  checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, 0,init_reweight);::fprintf(pFile1,"\n");
+  checkSFDProfile(pFile2, SFD_profile, 0,init_reweight);::fprintf(pFile2,"\n");
 
 
-  	write_radar_profile(pFile3, 0,"CMOR");fprintf(pFile3,"\n");
-	write_radar_profile(pFile4, 0,"AMOR");fprintf(pFile4,"\n");
+  	write_radar_profile(pFile3, 0,"CMOR");::fprintf(pFile3,"\n");
+	write_radar_profile(pFile4, 0,"AMOR");::fprintf(pFile4,"\n");
 	std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin()); std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
 	if(output_switch == 1) {Print_Outputs_Big(0,init_reweight);}
 	Print_Outputs_Small(0,init_reweight);
@@ -1528,17 +1528,17 @@ void iteration(const double radial_difference) {
 	OctreePoint *results;
 	// std::vector<float> results_weights;
 
-	cout << "Checking All Weights" << std::endl;
+	::cout << "Checking All Weights" << std::endl;
 	peterito->check_all_Weights();
 
 	// octree_next->get_all_weights(results_weights);
 	// james = 0;
 
 	// if(results_weights.size()>0){
-	// 	// printf("START DEBUG %lu\n",results_weights.size());
+	// 	// ::printf("START DEBUG %lu\n",results_weights.size());
 	// 	// cin >> pink;
-	// printf("Before set\n"); fflush(stdout);
-	printf("Before Setting iteration weights: Radial Difference: %14.5e\n", radial_difference);
+	// ::printf("Before set\n"); fflush(stdout);
+	::printf("Before Setting iteration weights: Radial Difference: %14.5e\n", radial_difference);
 	// setting_weight = 0.3 - tanh(log(radial_difference)*0.1)*0.3; if(setting_weight > 0.3) setting_weight = 0.3;
 	// setting_weight = 0.2 - tanh(log(radial_difference)*0.1)*0.2; if(setting_weight > 0.2) setting_weight = 0.2;
 
@@ -1549,13 +1549,13 @@ void iteration(const double radial_difference) {
 		setting_weight = 0.3 - tanh(log(radial_difference)*0.1)*0.3; if(setting_weight > 0.3) setting_weight = 0.3;
 	}
 	// setting_weight = 0.1;
-	printf("Setting iteration weights: %.5f, %.5f, Radial Difference: %14.5e\n", setting_weight, 1.0-setting_weight, radial_difference);
+	::printf("Setting iteration weights: %.5f, %.5f, Radial Difference: %14.5e\n", setting_weight, 1.0-setting_weight, radial_difference);
 	peterito->set_all_Weights(setting_weight); // Sets weights to 0.5*weight1 + 0.5*weight2
 	peterito->zero_Weights(); //Sets Iter weights to 0.0
-	// printf("Before set\n"); fflush(stdout);
+	// ::printf("Before set\n"); fflush(stdout);
 
 	// }
-	// for(int i=0;i<results_weights.size();++i){printf("weight %d: %.5e\n",i,results_weights[i]);}  fflush(stdout); cin >> pink;
+	// for(int i=0;i<results_weights.size();++i){::printf("weight %d: %.5e\n",i,results_weights[i]);}  fflush(stdout); cin >> pink;
 	int cntr=0;
 	int imp_index;
 	float pericenter;
@@ -1581,7 +1581,7 @@ void iteration(const double radial_difference) {
   //   }
   //   datafile.close();
   // }
-  // else cout << "Unable to open file"; 
+  // else ::cout << "Unable to open file"; 
   // return;
 
 
@@ -1606,16 +1606,16 @@ void iteration(const double radial_difference) {
 
 	dia_index = find_diameter_index(diameter);
 
-	// cout << "Sanity check - Diameter: "<<diameter <<", Found diameter: "<<SFD_array[dia_index][0] <<", Found Number of Particles: "<<SFD_array[dia_index][1] << "\n";
+	// ::cout << "Sanity check - Diameter: "<<diameter <<", Found diameter: "<<SFD_array[dia_index][0] <<", Found Number of Particles: "<<SFD_array[dia_index][1] << "\n";
 
-      if(old_diameter != diameter) cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
+      if(old_diameter != diameter) ::cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
       old_diameter=diameter;
       file_to_load=ReplaceAll(file_to_load,std::string(" "), std::string(""));
       cver_datafile = file_to_load.c_str();
-      // printf("|%s|\n|%s|",cdata_file,cver_datafile);fflush(stdout);
+      // ::printf("|%s|\n|%s|",cdata_file,cver_datafile);fflush(stdout);
       // file_to_load.replace( file_to_load.begin(), file_to_load.end(), '\\', '\\\\'); //replace all occurances of 'x' with 'y'
 // file_to_load=ReplaceAll(file_to_load,std::string("/"), std::string("\\\\"));
-// cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
+// ::cout << "Processing - " << file_to_load << ", Diameter: " << diameter << "\n";
   ifstream myfile(cver_datafile, ios::in|ios::binary| ios::ate);
   current_integration_time = 9e99;
 
@@ -1624,7 +1624,7 @@ void iteration(const double radial_difference) {
   factor1 = particle_cross_section * auday2ms * t_record/volume_unit;
   particle_mass = pow(diameter,3.0)/6.0*M_PI*2000.0*1e-18 ; // Particle mass in kg
   Qbind = As * pow((diameter*0.5*1e-6),Bs) * particle_mass;
-// printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio difference = %.5f, initial weights = %.5f\n", angle_diff, acos(angle_diff)*180.0/PI,ratio_diff,initial_weight); fflush(stdout);
+// ::printf("The parameters are: angle difference = %.5f (%.5f deg), velocity ratio difference = %.5f, initial weights = %.5f\n", angle_diff, acos(angle_diff)*180.0/PI,ratio_diff,initial_weight); fflush(stdout);
   if (myfile.is_open())
   {
     myfile.seekg (0, ios::beg);
@@ -1633,15 +1633,15 @@ void iteration(const double radial_difference) {
 		{
     
     readMyLineBinary(myfile, point, velvec1,parID, time_int ); // reads one line from the input file
-    // printf("File read weight - ID: %d, time: %13.5e \n",parID,time_int); fflush(stdout); 
+    // ::printf("File read weight - ID: %d, time: %13.5e \n",parID,time_int); fflush(stdout); 
     if(myfile.eof()) break;
     if(current_integration_time > time_int) { particle_weight.clear(); current_integration_time = time_int;}
 
     if(current_integration_time == time_int) // Here we start reading a new file so we start a new vector etc.
     {
     	particle_weight.push_back(weight);
-    	// printf("Pushed weight - ID: %d, weight: %13.5e, init weight: %13.5e, vector lenght: %lu \n",parID,particle_weight[parID],initial_weight,particle_weight.size()); fflush(stdout); 
-    	while((int)particle_weight.size()<parID)    	{printf("Particle %lu mysteriously missing at the very beginning of the datafile => next particle is %d \n", particle_weight.size(), parID);  particle_weight.push_back(weight);}
+    	// ::printf("Pushed weight - ID: %d, weight: %13.5e, init weight: %13.5e, vector lenght: %lu \n",parID,particle_weight[parID],initial_weight,particle_weight.size()); fflush(stdout); 
+    	while((int)particle_weight.size()<parID)    	{::printf("Particle %lu mysteriously missing at the very beginning of the datafile => next particle is %d \n", particle_weight.size(), parID);  particle_weight.push_back(weight);}
     }
 
 
@@ -1649,12 +1649,12 @@ void iteration(const double radial_difference) {
 	// std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
     res_index = peterito->getIndexes(point); //
     for (int jj=0; jj<3;jj++){
-    if(res_index[jj]>=400 || res_index[jj]<0) cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
+    if(res_index[jj]>=400 || res_index[jj]<0) ::cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
     }
     
     
     // octree->getPointsInsideBox({point.x-dr.x,point.y-dr.y,point.z-dr.z}, {point.x+dr.x,point.y+dr.y,point.z+dr.z}, results); //
-    // cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
+    // ::cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
     results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
 
     // octree_prev->getPointsInsideBox(point-dr, dr+point, results); //
@@ -1669,9 +1669,9 @@ void iteration(const double radial_difference) {
 
     if(results->getRecNum()>0){
 
-    	// if(results.size()>1) {printf("DOES THIS EVER HAPPEN ACT 3 - Results number > 1 ? ParID: %d, Time: %14.5e, Position: %14.5e,%14.5e,%14.5e, Rec Iter: %d, Results Size: %lu\n",parID,time_int,point.x,point.y,point.z,rec_iter,results.size());fflush(stdout);}
+    	// if(results.size()>1) {::printf("DOES THIS EVER HAPPEN ACT 3 - Results number > 1 ? ParID: %d, Time: %14.5e, Position: %14.5e,%14.5e,%14.5e, Rec Iter: %d, Results Size: %lu\n",parID,time_int,point.x,point.y,point.z,rec_iter,results.size());fflush(stdout);}
     	// Comment: When the particle is exactly on the grid line then the results.size() = 2, it happens rarely and it does not cause measurable problems
-    	// cout << results->getRecNum() << '\n'; fflush(stdout);
+    	// ::cout << results->getRecNum() << '\n'; fflush(stdout);
     	rec_iter = results->getRecNum();
     	breakable = 1;
     	for (int k=0;k<rec_iter ;++k){
@@ -1686,7 +1686,7 @@ void iteration(const double radial_difference) {
     		// CHANGE THIS
     		imp_index = results->getIndex(k);
     		impactor_energy = deltaV*deltaV*auday2ms*auday2ms*0.5*SFD_array[imp_index][2];
-    		// if(diameter>600) {printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
+    		// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
     		if(Qbind > impactor_energy) {continue;} // Binding Energy is larger than the kinetic energy of the impactor => no effect
 
     		///////////////
@@ -1699,14 +1699,14 @@ void iteration(const double radial_difference) {
     		tau_coll = impactor_weight * deltaV * factor1 * pow(diameter+SFD_array[imp_index][0],2);
 
     		collisional_total_tau += tau_coll;
-		    // 		printf("Check Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],deltaV,current_integration_time,time_int); fflush(stdout); 
+		    // 		::printf("Check Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],deltaV,current_integration_time,time_int); fflush(stdout); 
 		    // 			    if(particle_weight[parID]>initial_weight){
-		    // 	printf("BEFORE Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],deltaV,impactor_weight,tau_coll); fflush(stdout); cin >> pink;
+		    // 	::printf("BEFORE Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],deltaV,impactor_weight,tau_coll); fflush(stdout); cin >> pink;
 		    // }
-    		// if(diameter>600 && SFD_array[imp_index][0]<600) {printf("Check Grinding - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor dia: %.f, imp SFD: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e, decrease: %13.5e\n",parID,time_int,particle_weight[parID],deltaV,SFD_array[imp_index][0],SFD_array[imp_index][1],impactor_weight,tau_coll,exp(-tau_coll)); fflush(stdout); }
+    		// if(diameter>600 && SFD_array[imp_index][0]<600) {::printf("Check Grinding - ID: %d, time: %13.5e, weight: %13.5e, deltaV: %13.5e, impactor dia: %.f, imp SFD: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e, decrease: %13.5e\n",parID,time_int,particle_weight[parID],deltaV,SFD_array[imp_index][0],SFD_array[imp_index][1],impactor_weight,tau_coll,exp(-tau_coll)); fflush(stdout); }
     		particle_weight[parID]=particle_weight[parID]*exp(-tau_coll);
     		 if(particle_weight[parID]>weight || tau_coll < 0 ){
-    			printf("Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, init_weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],weight,deltaV,impactor_weight,tau_coll);  fflush(stdout); cin >> debug_char;
+    			::printf("Something is wrong - ID: %d, time: %13.5e, weight: %13.5e, init_weight: %13.5e, deltaV: %13.5e, impactor_weight: %13.5e, tau_coll: %13.5e \n",parID,time_int,particle_weight[parID],weight,deltaV,impactor_weight,tau_coll);  ::fflush(stdout); cin >> debug_char;
    			}
     		}
 
@@ -1737,9 +1737,9 @@ void iteration(const double radial_difference) {
     		// vec2 = results->getVelocity(k);
     		// cosAngleVec(velvec1,vec2, cosphi, ratio);
     		// int SFD_index = results->getIndex(k); 
-    		// printf("DOES THIS EVER HAPPEN ACT 2.1? Vec1 %14.5e,%14.5e,%14.5e, Vec2: %14.5e,%14.5e,%14.5e, ratio: %14.5e, cosphi: %14.5e, rec: %d, grid_dia; %d, par_dia: %d\n",vec1.x,vec1.y,vec1.z,vec2.x,vec2.y,vec2.z,ratio, cosphi,rec_iter,SFD_index,dia_index);fflush(stdout);
+    		// ::printf("DOES THIS EVER HAPPEN ACT 2.1? Vec1 %14.5e,%14.5e,%14.5e, Vec2: %14.5e,%14.5e,%14.5e, ratio: %14.5e, cosphi: %14.5e, rec: %d, grid_dia; %d, par_dia: %d\n",vec1.x,vec1.y,vec1.z,vec2.x,vec2.y,vec2.z,ratio, cosphi,rec_iter,SFD_index,dia_index);fflush(stdout);
     		// }
-    		printf("Particle victim of a rounding error - ParID: %d, Time: %14.5e, Position: %14.5e,%14.5e,%14.5e, Rec Iter: %d\n",parID,time_int,point.x,point.y,point.z,rec_iter);fflush(stdout);
+    		::printf("Particle victim of a rounding error - ParID: %d, Time: %14.5e, Position: %14.5e,%14.5e,%14.5e, Rec Iter: %d\n",parID,time_int,point.x,point.y,point.z,rec_iter);::fflush(stdout);
     		// cin >> debug_char;
     		// results->insertWeight(particle_weight[parID]);
     		// results->insertDiameter(diameter);
@@ -1748,7 +1748,7 @@ void iteration(const double radial_difference) {
     		}
     }
     else {
-    	printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
+    	::printf("DOES THIS EVER HAPPEN?\n");::fflush(stdout);
     	perror ("No particles found in the grid - This should never happen, email the code author!");
     	abort();
     	// weight=particle_weight[parID];
@@ -1768,14 +1768,14 @@ void iteration(const double radial_difference) {
     float impact_prob_with_earth;
     float impact_prob_with_probe;
     getCollProbWithEarth(point*au, velvec1*auday2ms, Vec3(1.5e11,0,0), Vec3(0,-29800.0,0), 11200e0, M_PI*6371e3*6371e3, 86400.0, a_met, e_met, inc_met, vg_met,impact_prob_with_earth,impact_prob_with_probe); // Probability per day
-    // if(impact_prob_with_earth > 0.0) {fprintf(pFile666, "%d %13.5e %13.5e %13.5e %13.5e %13.5e %13.5e\n", parID, time_int, a_met/au,e_met,inc_met,vg_met,impact_prob_with_earth);}
+    // if(impact_prob_with_earth > 0.0) {::fprintf(pFile666, "%d %13.5e %13.5e %13.5e %13.5e %13.5e %13.5e\n", parID, time_int, a_met/au,e_met,inc_met,vg_met,impact_prob_with_earth);}
 
     collisional_lifetime = 1.0/collisional_total_tau;
     mass_accreted_at_Earth += impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1] * SFD_array[dia_index][2];
 
 
     // da = 0.06, de = 0.01, dinc = 1.8, dvg = 0.8
-    // printf("Record particle: a: %13.5e, e: %13.5e,inc: %13.5e,vg: %13.5e, prob: %13.5e\n", a_met, e_met, inc_met, vg_met);
+    // ::printf("Record particle: a: %13.5e, e: %13.5e,inc: %13.5e,vg: %13.5e, prob: %13.5e\n", a_met, e_met, inc_met, vg_met);
     // record_radar_profile(a_met,e_met,inc_met,vg_met, impact_prob_with_earth * particle_weight[parID]* SFD_array[dia_index][1], SFD_array[dia_index][2], "CMOR");
     // record_radar_profile(a_met,e_met,inc_met,vg_met, impact_prob_with_earth * particle_weight[parID]* SFD_array[dia_index][1], SFD_array[dia_index][2], "AMOR");
     record_radar_profile(a_met,e_met,inc_met,vg_met, impact_prob_with_earth * particle_weight[parID], dia_index, "CMOR");
@@ -1799,17 +1799,17 @@ void iteration(const double radial_difference) {
 
     myfile.close();
   }
-  else cout << "Unable to open binary file\n"; 
+  else ::cout << "Unable to open binary file\n"; 
 
       }
     datafile.close();
 
   }
-  else cout << "Unable to open file\n" ;
+  else ::cout << "Unable to open file\n" ;
 
   // peterito->check_all_Weights();
 
-  cout << "Testing Zone: Area" << test_zody_area << ", Mass: " << test_zody_mass << std::endl;
+  ::cout << "Testing Zone: Area" << test_zody_area << ", Mass: " << test_zody_mass << std::endl;
   // checkRadialProfile(r_prof_iter, 1);
   return;
 }
@@ -1843,9 +1843,9 @@ void calculate_velocity_vector(Vec3 P_vec, Vec3 Q_vec, float a, float e, float t
  a = a * au;
  // GM=1.32712440018d20
  n = sqrt(GM_sun*pow((a),-3.0)); // TO METERS per SECOND
- // cout << "Velocity Vector Calculation: " << a << "\t" << au << "\t" << GM_sun << std::endl;
+ // ::cout << "Velocity Vector Calculation: " << a << "\t" << au << "\t" << GM_sun << std::endl;
  V_vec=n*a/sqrt(1.0-e*e)*(-sin(true_anom)*P_vec+(e+cos(true_anom))*Q_vec);
- // cout << "Velocity Vector Calculation - 2: " << V_vec.x << "\t" << V_vec.y << "\t" << V_vec.z  << std::endl;
+ // ::cout << "Velocity Vector Calculation - 2: " << V_vec.x << "\t" << V_vec.y << "\t" << V_vec.z  << std::endl;
 }
 
 void convert_orbel_to_xyz(float a, float e, float inc, float capom, float omega, float true_anom, 
@@ -1962,7 +1962,7 @@ std::vector<double> particle_weight;
 	OctreePoint *results;
 	// std::vector<float> results_weights;
 
-	cout << "Checking All Weights" << std::endl;
+	::cout << "Checking All Weights" << std::endl;
 	peterito->check_all_Weights();
 
 	
@@ -2003,7 +2003,7 @@ std::vector<double> particle_weight;
 
   FILE * pFile_temp;
   pFile_temp = fopen(  (std::string("Collisional_Map_D_met_")+std::to_string(diameter)).c_str(),"w+");
-  fprintf(pFile_temp,"#Average_Collisional_Lifetime  Ecc Inc\n");
+  ::fprintf(pFile_temp,"#Average_Collisional_Lifetime  Ecc Inc\n");
 
   a_met = 0.3871;
   
@@ -2043,7 +2043,7 @@ std::vector<double> particle_weight;
 	// std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
     res_index = peterito->getIndexes(point); //
     for (int jj=0; jj<3;jj++){
-    if(res_index[jj]>=400 || res_index[jj]<0) cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
+    if(res_index[jj]>=400 || res_index[jj]<0) ::cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
     }
     
     
@@ -2060,10 +2060,10 @@ std::vector<double> particle_weight;
 
     		vec1 = velvec1*(1.0/auday2ms);
     		vec2 = results->getVelocity(k);
-    		// cout << velvec1.x << "\t" << velvec1.y << "\t" << velvec1.z  << "\t" << auday2ms << std::endl;
-    		// cout << velvec1.x*(1.0/auday2ms) << "\t" << velvec1.y*(1.0/auday2ms) << "\t" << velvec1.z*(1.0/auday2ms)  << "\t - WTF ---  " << float(auday2ms)/float(auday2ms) << std::endl;
-    		// cout << vec1.x << "\t" << vec1.y << "\t" << vec1.z  << std::endl;
-    		// cout << vec2.x << "\t" << vec2.y << "\t" << vec2.z  << std::endl;
+    		// ::cout << velvec1.x << "\t" << velvec1.y << "\t" << velvec1.z  << "\t" << auday2ms << std::endl;
+    		// ::cout << velvec1.x*(1.0/auday2ms) << "\t" << velvec1.y*(1.0/auday2ms) << "\t" << velvec1.z*(1.0/auday2ms)  << "\t - WTF ---  " << float(auday2ms)/float(auday2ms) << std::endl;
+    		// ::cout << vec1.x << "\t" << vec1.y << "\t" << vec1.z  << std::endl;
+    		// ::cout << vec2.x << "\t" << vec2.y << "\t" << vec2.z  << std::endl;
     		// cin >> debug_char;
     		getDeltaV(vec1,vec2, deltaV);
     		// deltaV = deltaV * auday2ms;
@@ -2072,20 +2072,20 @@ std::vector<double> particle_weight;
     		// CHANGE THIS
     		imp_index = results->getIndex(k);
     		impactor_energy = deltaV*deltaV*auday2ms*auday2ms*0.5*SFD_array[imp_index][2];
-    		// if(diameter>600) {printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
+    		// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
     		if(Qbind > impactor_energy) {continue;} // Binding Energy is larger than the kinetic energy of the impactor => no effect
 
     		impactor_weight = results->getWeight(k) * SFD_array[imp_index][1];
     		tau_coll = impactor_weight * deltaV * factor1 * pow(diameter+SFD_array[imp_index][0],2);
 
     		collisional_total_tau += tau_coll/t_record;
-    		// printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout);
+    		// ::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout);
     }
 
     
     }
     else {
-    	// printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
+    	// ::printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
     	// weight=particle_weight[parID];
     	// addOctreePoint(octree_prev, point,particle_weight[parID],dia_index,velvec1);
     	cntr+=1;
@@ -2096,14 +2096,14 @@ std::vector<double> particle_weight;
 
 }
 }   
-// cout << "Average Collisional Lifetime: " << average_collisional_lifetime/double(i1_max*i1_max*i1_max) <<" Ecc: " << e_met << " Inc: " << inc_met <<  std::endl;
-cout << "Average Collisional Lifetime: " << 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) << " A_met: " << a_met << " Ecc: " << e_met << " Inc: " << inc_met << " Diameter: " << diameter << std::endl;
-fprintf(pFile_temp,"%13.5e %13.5e %13.5e  %13.5e\n", 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) , e_met, inc_met, diameter);
+// ::cout << "Average Collisional Lifetime: " << average_collisional_lifetime/double(i1_max*i1_max*i1_max) <<" Ecc: " << e_met << " Inc: " << inc_met <<  std::endl;
+::cout << "Average Collisional Lifetime: " << 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) << " A_met: " << a_met << " Ecc: " << e_met << " Inc: " << inc_met << " Diameter: " << diameter << std::endl;
+::fprintf(pFile_temp,"%13.5e %13.5e %13.5e  %13.5e\n", 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) , e_met, inc_met, diameter);
 }
 }
 
 
-fclose(pFile_temp);
+::fclose(pFile_temp);
 }
   return;
 
@@ -2219,7 +2219,7 @@ if(point.maxComponent()>=octree_limit || point.minComponent()<=-octree_limit) { 
 // std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
 res_index = peterito->getIndexes(point); //
 for (int jj=0; jj<3;jj++){
-	if(res_index[jj]>=400 || res_index[jj]<0) cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
+	if(res_index[jj]>=400 || res_index[jj]<0) ::cout << "index:" << jj<< "\t is "<<res_index[jj]<< "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n"; 
 }
 
 
@@ -2236,10 +2236,10 @@ if(results->getRecNum()>0){
 
 		vec1 = velvec1*(1.0/auday2ms);
 		vec2 = results->getVelocity(k);
-// cout << velvec1.x << "\t" << velvec1.y << "\t" << velvec1.z  << "\t" << auday2ms << std::endl;
-// cout << velvec1.x*(1.0/auday2ms) << "\t" << velvec1.y*(1.0/auday2ms) << "\t" << velvec1.z*(1.0/auday2ms)  << "\t - WTF ---  " << float(auday2ms)/float(auday2ms) << std::endl;
-// cout << vec1.x << "\t" << vec1.y << "\t" << vec1.z  << std::endl;
-// cout << vec2.x << "\t" << vec2.y << "\t" << vec2.z  << std::endl;
+// ::cout << velvec1.x << "\t" << velvec1.y << "\t" << velvec1.z  << "\t" << auday2ms << std::endl;
+// ::cout << velvec1.x*(1.0/auday2ms) << "\t" << velvec1.y*(1.0/auday2ms) << "\t" << velvec1.z*(1.0/auday2ms)  << "\t - WTF ---  " << float(auday2ms)/float(auday2ms) << std::endl;
+// ::cout << vec1.x << "\t" << vec1.y << "\t" << vec1.z  << std::endl;
+// ::cout << vec2.x << "\t" << vec2.y << "\t" << vec2.z  << std::endl;
 // cin >> debug_char;
 		getDeltaV(vec1,vec2, deltaV);
 // deltaV = deltaV * auday2ms;
@@ -2248,20 +2248,20 @@ if(results->getRecNum()>0){
 // CHANGE THIS
 		imp_index = results->getIndex(k);
 		impactor_energy = deltaV*deltaV*auday2ms*auday2ms*0.5*SFD_array[imp_index][2];
-// if(diameter>600) {printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
+// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
 if(Qbind > impactor_energy) {continue;} // Binding Energy is larger than the kinetic energy of the impactor => no effect
 
 impactor_weight = results->getWeight(k) * SFD_array[imp_index][1];
 tau_coll = impactor_weight * deltaV * factor1;
 
 collisional_total_tau += tau_coll/t_record;
-// printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout);
+// ::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout);
 }
 
 
 }
 else {
-// printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
+// ::printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
 // weight=particle_weight[parID];
 // addOctreePoint(octree_prev, point,particle_weight[parID],dia_index,velvec1);
 	cntr+=1;
@@ -2272,14 +2272,14 @@ average_collisional_lifetime += collisional_total_tau*86400.0*365.25;
 
 }
 }   
-// cout << "Average Collisional Lifetime: " << average_collisional_lifetime/double(i1_max*i1_max*i1_max) <<" Ecc: " << e_met << " Inc: " << inc_met <<  std::endl;
-cout << "Average Collisional Lifetime: " << 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) << " A_met: " << a_met << " Diameter: " << diameter <<  std::endl;
-fprintf(pFile_temp,"Average Collisional Lifetime: %13.5e  Ecc: %13.5e  Inc: %13.5e\n", 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) , a_met, diameter);
+// ::cout << "Average Collisional Lifetime: " << average_collisional_lifetime/double(i1_max*i1_max*i1_max) <<" Ecc: " << e_met << " Inc: " << inc_met <<  std::endl;
+::cout << "Average Collisional Lifetime: " << 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) << " A_met: " << a_met << " Diameter: " << diameter <<  std::endl;
+::fprintf(pFile_temp,"Average Collisional Lifetime: %13.5e  Ecc: %13.5e  Inc: %13.5e\n", 1.0/(average_collisional_lifetime/double(i1_max*i1_max*i1_max)) , a_met, diameter);
 }
 }
 
 
-fclose(pFile_temp);
+::fclose(pFile_temp);
 }
 return;
 
@@ -2318,7 +2318,7 @@ int main(int argc, char **argv) {
     while (std::getline(file, str))
     {
     	found = str.find("#");
-    	// cout << found << "\n";
+    	// ::cout << found << "\n";
     	if(found != string::npos)str.erase(str.begin()+found, str.end());
     	if(input_cntr == 0) alpha = stof(str);
     	if(input_cntr == 1) beta = stof(str);
@@ -2332,11 +2332,11 @@ int main(int argc, char **argv) {
     	if(input_cntr == 9) load_save_switch = stoi(str);
     	if(input_cntr == 10) reweight_switch = stoi(str);
     	
-        // cout << str << input_cntr << "\n";
+        // ::cout << str << input_cntr << "\n";
         input_cntr ++;
     }
 
-    } else {cout << "File not found! \t " << "input.in" << "\n";}
+    } else {::cout << "File not found! \t " << "input.in" << "\n";}
 
     initial_weight = intended_cloud_area;
 	load_radar_constraints();
@@ -2352,8 +2352,8 @@ int main(int argc, char **argv) {
 
 	particle_density = 2000; // kg m^-3
 
-	cout << "Fitting parameters: alpha = " << alpha << ", beta = " << beta << ", Dmid = " << Dmid << ",As = " << As << ", Bs = " << Bs << ", Intended Cloud Area: " << intended_cloud_area << "\n";
-	cout << "Fitting parameters: pericenter_index = " << pericenter_index << ", Output_Switch = " << output_switch << "\n";
+	std::cout << "Fitting parameters: alpha = " << alpha << ", beta = " << beta << ", Dmid = " << Dmid << ",As = " << As << ", Bs = " << Bs << ", Intended Cloud Area: " << intended_cloud_area << "\n";
+	std::cout << "Fitting parameters: pericenter_index = " << pericenter_index << ", Output_Switch = " << output_switch << "\n";
 	// Parameters
 
 	peterito = new Grid3D(Vec3(10.0,10.0,10.0),Vec3(0.05,0.05,0.05));
@@ -2389,7 +2389,7 @@ int main(int argc, char **argv) {
 
 
 	for(int i=0;i<(int)SFD_array.size();i++){
-		printf("%d, Diameter: %.f, SFD Number: %13.5e, Intergration particle count: %13.5e\n", i, SFD_array[i][0],SFD_array[i][1],Integration_Setup_array[i][1]);
+		std::printf("%d, Diameter: %.f, SFD Number: %13.5e, Intergration particle count: %13.5e\n", i, SFD_array[i][0],SFD_array[i][1],Integration_Setup_array[i][1]);
 	}
 
 	
@@ -2401,7 +2401,7 @@ int main(int argc, char **argv) {
 
 	if(load_save_switch == 1) {
 	initial_weight = peterito->load_grid3D();
-	cout << "GRID SUCCESSFULLY LOADED!!!!!" << std::endl;
+	::cout << "GRID SUCCESSFULLY LOADED!!!!!" << std::endl;
 
 	// calculate_collisional_lifetime_map();
 	// // calculate_collisional_lifetime_plot();
@@ -2410,7 +2410,7 @@ int main(int argc, char **argv) {
 
 	}
 
-	T = stopwatch() - start; printf("Time-elapsed Init: %.5f - total number of particles loaded: %d\n",T,total_number_of_particles_integration); start = stopwatch();fflush(stdout); // Timer
+	T = stopwatch() - start; ::printf("Time-elapsed Init: %.5f - total number of particles loaded: %d\n",T,total_number_of_particles_integration); start = stopwatch();::fflush(stdout); // Timer
 
 	float zody_area ;
 	float zody_mass ;
@@ -2428,23 +2428,23 @@ int main(int argc, char **argv) {
 		std::fill(SFD_profile_Kessler.begin(),SFD_profile_Kessler.end(),0); // Fills the ecliptic latitude profile with zeros before we start putting numbers there
 		std::fill(r_prof_brightness.begin(),r_prof_brightness.end(),0); // Fills the ecliptic latitude profile with zeros before we start putting numbers there
 
-		// cout << "T1 " << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
+		// ::cout << "T1 " << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
 
 		initialize_radar_measurements();
 
-		// cout << My_Constraints.CMOR_AH_a_x.size() << "\t" << My_Constraints.CMOR_AH_a_y.size() << "\t" << My_Constraints.CMOR_AH_ecc_x.size() << "\t" << My_Constraints.CMOR_AH_ecc_y.size() << "\n";
-		// cout << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
+		// ::cout << My_Constraints.CMOR_AH_a_x.size() << "\t" << My_Constraints.CMOR_AH_a_y.size() << "\t" << My_Constraints.CMOR_AH_ecc_x.size() << "\t" << My_Constraints.CMOR_AH_ecc_y.size() << "\n";
+		// ::cout << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
 
-		cout << "Before iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
+		::cout << "Before iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
 		iteration(radial_difference);
-		cout << "After iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
+		::cout << "After iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
 		normalize_radar_measurements();
-		printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
+		::printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
 
 		
 
 	// 	for (int i=0;i<My_Measurements.CMOR_AH_a_y.size(); ++i){
-	// 	printf("RADAR CHECK --- %.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
+	// 	::printf("RADAR CHECK --- %.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n", 
 	// 		My_Constraints.CMOR_AH_a_x[i], My_Measurements.CMOR_AH_a_y[i],
 	// 		My_Constraints.CMOR_AH_ecc_x[i], My_Measurements.CMOR_AH_ecc_y[i],
 	// 		My_Constraints.CMOR_AH_inc_x[i], My_Measurements.CMOR_AH_inc_y[i],
@@ -2455,44 +2455,44 @@ int main(int argc, char **argv) {
 
 		// pfileTEST = fopen ("TEST_probability","w+");
 		// for(int TEST_I=0; TEST_I < TEST_probabilities.size(); TEST_I++){
-		// fprintf(pfileTEST,"%15.7e\n",TEST_probabilities[TEST_I]);
+		// ::fprintf(pfileTEST,"%15.7e\n",TEST_probabilities[TEST_I]);
 		// 	}
 		// return 1;
 		iter_count += 1;
 		// radial_difference = getRadialDifference(r_prof_init,r_prof_iter); 
 		radial_difference = peterito->get_the_iteration_difference();
-		cout << "Radial Difference New " << radial_difference << std::endl;
+		::cout << "Radial Difference New " << radial_difference << std::endl;
 		radial_difference = getRadialDifference(r_prof_init,r_prof_iter); 
-		cout << "Radial Difference Oold " << radial_difference << std::endl;
+		::cout << "Radial Difference Oold " << radial_difference << std::endl;
 
-		printf("\n ---------------------- \n");
+		::printf("\n ---------------------- \n");
 
 		zody_area = calculate_cloud_area();
 		zody_mass = calculate_cloud_mass();
 
-		T = stopwatch() - start; printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n",iter_count,T,radial_difference, zody_area, zody_mass); start = stopwatch();printf("---------------------- \n"); fflush(stdout);
-		checkRadialProfile(pFile, r_prof_iter, iter_count);fprintf(pFile,"\n");
-		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);fprintf(pFile1,"\n");
-		checkSFDProfile(pFile2, SFD_profile, iter_count);fprintf(pFile2,"\n");
-		write_radar_profile(pFile3, iter_count,"CMOR");fprintf(pFile3,"\n");
-		write_radar_profile(pFile4, iter_count,"AMOR");fprintf(pFile4,"\n");
+		T = stopwatch() - start; ::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n",iter_count,T,radial_difference, zody_area, zody_mass); start = stopwatch();::printf("---------------------- \n"); ::fflush(stdout);
+		checkRadialProfile(pFile, r_prof_iter, iter_count);::fprintf(pFile,"\n");
+		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);::fprintf(pFile1,"\n");
+		checkSFDProfile(pFile2, SFD_profile, iter_count);::fprintf(pFile2,"\n");
+		write_radar_profile(pFile3, iter_count,"CMOR");::fprintf(pFile3,"\n");
+		write_radar_profile(pFile4, iter_count,"AMOR");::fprintf(pFile4,"\n");
 		if(output_switch == 1) {Print_Outputs_Big(iter_count);}
 		Print_Outputs_Small(iter_count);
 		Zero_Outputs();
 		std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin()); std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
 	}
-	fclose (pFile);
-	fclose (pFile1);
-	fclose (pFile2);
-	fclose (pFile3);
-	fclose (pFile4);
+	::fclose (pFile);
+	::fclose (pFile1);
+	::fclose (pFile2);
+	::fclose (pFile3);
+	::fclose (pFile4);
 
 
 
 	pFile4 = fopen ("Outputs_Mass_Accreted","w+");
 	std::vector<double> mass_vector;
 	calculate_Earth_Mass_Flux(mass_vector,iter_count);
-	fclose(pFile4);
+	::fclose(pFile4);
 
 
 	// float zody_area = compute_sum(ecl_profile);
@@ -2533,7 +2533,7 @@ int main(int argc, char **argv) {
 	// float quality_factor = pow(log( ratio1),2) + pow(log( ratio2),2) + pow(log( ratio3),2); // OLD QUALITY
 	float quality_factor = abs(log( ratio1)) +abs(log( ratio2 )) +abs(log( ratio3));
 
-	cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: "<< quality_factor << ", Reweight Factor: "<< reweight_factor << "\n";
+	::cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: "<< quality_factor << ", Reweight Factor: "<< reweight_factor << "\n";
 
 
 
@@ -2548,10 +2548,10 @@ int main(int argc, char **argv) {
 	radial_difference = 1.0;
 	iter_count += 100;
 
-	printf("\n ---------------------- \n");
-	cout << "Recalculating the initial weight: " << initial_weight << ", reweighting factor: " << reweight_factor<<  "\n";
+	::printf("\n ---------------------- \n");
+	::cout << "Recalculating the initial weight: " << initial_weight << ", reweighting factor: " << reweight_factor<<  "\n";
 	peterito->reweight_ALL_Weights(reweight_factor);
-	printf("\n ---------------------- \n");
+	::printf("\n ---------------------- \n");
 
 	pFile = fopen (cradial_file,"a+");
 	pFile1 = fopen (cecl_file,"a+");
@@ -2573,38 +2573,38 @@ int main(int argc, char **argv) {
 		iteration(radial_difference);
 		normalize_radar_measurements();
 
-		printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
+		::printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
 		iter_count += 1;
 		// radial_difference = getRadialDifference(r_prof_init,r_prof_iter); 
 		radial_difference = peterito->get_the_iteration_difference();
-		cout << "Radial Difference New " << radial_difference << std::endl;
+		::cout << "Radial Difference New " << radial_difference << std::endl;
 		radial_difference = getRadialDifference(r_prof_init,r_prof_iter); 
-		cout << "Radial Difference Oold " << radial_difference << std::endl;
-		printf("\n ---------------------- \n");
+		::cout << "Radial Difference Oold " << radial_difference << std::endl;
+		::printf("\n ---------------------- \n");
 		zody_area = calculate_cloud_area();
 		zody_mass = calculate_cloud_mass();
 
-		T = stopwatch() - start; printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n",iter_count,T,radial_difference, zody_area, zody_mass); start = stopwatch();printf("---------------------- \n"); fflush(stdout);
-		checkRadialProfile(pFile, r_prof_iter, iter_count);fprintf(pFile,"\n");
-		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);fprintf(pFile1,"\n");
-		checkSFDProfile(pFile2, SFD_profile, iter_count);fprintf(pFile2,"\n");
-		write_radar_profile(pFile3, iter_count,"CMOR");fprintf(pFile3,"\n");
-		write_radar_profile(pFile4, iter_count,"AMOR");fprintf(pFile4,"\n");
+		T = stopwatch() - start; ::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n",iter_count,T,radial_difference, zody_area, zody_mass); start = stopwatch();::printf("---------------------- \n"); ::fflush(stdout);
+		checkRadialProfile(pFile, r_prof_iter, iter_count);::fprintf(pFile,"\n");
+		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);::fprintf(pFile1,"\n");
+		checkSFDProfile(pFile2, SFD_profile, iter_count);::fprintf(pFile2,"\n");
+		write_radar_profile(pFile3, iter_count,"CMOR");::fprintf(pFile3,"\n");
+		write_radar_profile(pFile4, iter_count,"AMOR");::fprintf(pFile4,"\n");
 		std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin()); std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
 		if(output_switch == 1) {Print_Outputs_Big(iter_count);}
 		Print_Outputs_Small(iter_count);
 		Zero_Outputs();
 	}
-	fclose (pFile);
-	fclose (pFile1);
-	fclose (pFile2);
-	fclose (pFile3);
-	fclose (pFile4);
+	::fclose (pFile);
+	::fclose (pFile1);
+	::fclose (pFile2);
+	::fclose (pFile3);
+	::fclose (pFile4);
 
 	pFile4 = fopen ("Outputs_Mass_Accreted","a+");
 	mass_vector.clear(); 
 	calculate_Earth_Mass_Flux(mass_vector,iter_count);
-	fclose(pFile4);
+	::fclose(pFile4);
 
 
 	zody_area = calculate_cloud_area();
@@ -2618,7 +2618,7 @@ int main(int argc, char **argv) {
 	// quality_factor = pow(log( ratio1),2) + pow(log( ratio2),2) + pow(log( ratio3),2);
 	quality_factor = abs(log( ratio1)) +abs(log( ratio2 )) +abs(log( ratio3));
 
-	cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: "<< quality_factor << "\n";
+	::cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: "<< quality_factor << "\n";
 	// reweight_factor =  exp( ( log(ratio1)+log(ratio2)+log(ratio3) ) / (-3.0)) ;
 
 	// estimate1 = abs(log( ratio1/ratio1)) +abs(log( ratio2/ratio1 )) +abs(log( ratio3/ratio1));
@@ -2633,8 +2633,8 @@ int main(int argc, char **argv) {
 }
 }
 	pFile = fopen("Fitting_Parameters.results", "a+");
-	fprintf(pFile,"alpha: %7.3f\t beta: %7.3f\t Dmid: %8.3f\t As_mod: %7.3f\t Bs: %7.3f\t Initial_Weight: %13.5e\t Reweight_factor: %8.3f\t Quality_Factor: %7.3f, Ratios: %7.3f\t%7.3f\t%7.3f\n",alpha,beta,Dmid,As_modifier,Bs,initial_weight,reweight_factor, quality_factor,ratio1,ratio2,ratio3);
-	fclose(pFile);
+	::fprintf(pFile,"alpha: %7.3f\t beta: %7.3f\t Dmid: %8.3f\t As_mod: %7.3f\t Bs: %7.3f\t Initial_Weight: %13.5e\t Reweight_factor: %8.3f\t Quality_Factor: %7.3f, Ratios: %7.3f\t%7.3f\t%7.3f\n",alpha,beta,Dmid,As_modifier,Bs,initial_weight,reweight_factor, quality_factor,ratio1,ratio2,ratio3);
+	::fclose(pFile);
 
 
     std::cout << "Calculation check: Overflow flag: " << (bool)std::fetestexcept(FE_OVERFLOW) << "Underflow flag: " << (bool)std::fetestexcept(FE_UNDERFLOW) << std::endl;
