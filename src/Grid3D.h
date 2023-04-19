@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include <vector>
-#include "OctreePoint.h"
+#include "GridPoint.h"
 
 using namespace std;
 
@@ -43,8 +43,8 @@ namespace petrpokorny {
 		}
 
 		public:
-			vector<vector<vector<OctreePoint>>> data;   //! Data point to be stored at a node
-		// 	vector<vector<vector<OctreePoint>>>  data;   //! Data point to be stored at a node
+			vector<vector<vector<GridPoint>>> data;   //! Data point to be stored at a node
+		// 	vector<vector<vector<GridPoint>>>  data;   //! Data point to be stored at a node
 		
 		Grid3D(const Vec3& xyzsize, const Vec3& dr) 
 			: xyzsize(xyzsize), dr(dr){
@@ -53,7 +53,7 @@ namespace petrpokorny {
 				 ydim = round(xyzsize.y/dr.y)*2;
 				 zdim = round(xyzsize.z/dr.z)*2;
 	
-		// 		data(xdim, std::vector<std::vector<OctreePoint> >(ydim,  std::vector<OctreePoint>(zdim)));
+		// 		data(xdim, std::vector<std::vector<GridPoint> >(ydim,  std::vector<GridPoint>(zdim)));
 
 
 
@@ -99,7 +99,7 @@ namespace petrpokorny {
 		int getZDim() { return zdim;}
 
 
-	void getPointsInsideGrid(const Vec3 point, OctreePoint *results) {
+	void getPointsInsideGrid(const Vec3 point, GridPoint *results) {
 		int xindex = round(point.x/dr.x)+xdim*0.5;
 		int yindex = round(point.y/dr.y)+ydim*0.5;
 		int zindex = round(point.z/dr.z)+zdim*0.5;

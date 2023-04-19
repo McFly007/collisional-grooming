@@ -24,7 +24,10 @@ const double GM_sun = double(1.32712440018e20); // Graviational parameter of the
 const double GM_earth = double(3.986004418e14); // Graviational parameter of the Earth
 const double deg2rad = double(0.0174532925199e0); // Conversion from degrees to radians
 const double rad2deg = double(1.0/deg2rad);
-using namespace brandonpelfrey;
+
+
+// Define namespaces
+// using namespace grid_octree;
 using namespace petrpokorny;
 using namespace std;
 
@@ -83,9 +86,9 @@ FILE * pFile666;
 // Used for testing
 std::vector<Vec3> points;
 Grid3D *peterito;
-Octree *octree;
-Octree *octree_iteration;
-OctreePoint *octreePoints;
+// Octree *octree;
+// Octree *octree_iteration;
+GridPoint *octreePoints;
 Vec3 qmin, qmax, r_scan;
 Vec3 point;
 
@@ -415,19 +418,6 @@ void readMyLineBinary(ifstream &file, Vec3 &point, Vec3 &velvec1, int &parID, fl
 Vec3 gridVec3(Vec3 v, Vec3 dr) // Attaches the point to the 3d grid defined by dr
 { return Vec3(round(v.x*0.5/dr.x)*dr.x*2.0, round(v.y*0.5/dr.y)*dr.y*2.0, round(v.z*0.5/dr.z)*dr.z*2.0); }
 
-void addOctreePoint(Octree *octree_insert, Vec3 point,float weight,int index,Vec3 velvec1){
-		octreePoints = new OctreePoint;
-		point = gridVec3(point,dr);
-	    octreePoints->setPosition(point);
-    	octreePoints->insertWeight(weight);
-    	octreePoints->insertWeight_Iter(weight);
-    	octreePoints->insertIndex(index);
-    	octreePoints->insertVelocity(velvec1);
-    	octreePoints->addRecord();
-    	octree_insert->insert(octreePoints);
-    	octreePoints = NULL;
-}
-
 void checkRadialProfile(FILE * pFile_w, std::vector<double> &r_prof,int counter, float reweighting_factor = 1.0){
 	for (int i=0;i<(int)r_prof.size(); ++i){
 		if(r_prof[i]>0) {::fprintf(pFile_w,"%.5f %13.5e %d %13.5e\n", i*dr.x*2.0+dr.x, r_prof[i]*reweighting_factor, counter, r_prof_brightness[i]*reweighting_factor );}
@@ -667,7 +657,7 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector,int iter_count){
 	Vec3 Earth_r;
 	Vec3 Earth_v;
 	std::vector<int> res_index;
-	OctreePoint *results;
+	GridPoint *results;
 
 	float true_anom;
 	float deltaV;
@@ -1082,7 +1072,7 @@ double calculate_cloud_mass(){
 	double record_total_mass;
 	int record_index;
 	int rec_iter;
-	OctreePoint *results;
+	GridPoint *results;
 
 
 	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
@@ -1117,7 +1107,7 @@ double calculate_cloud_area(){
 	int record_index;
 	int rec_iter;
 	float diameter;
-	OctreePoint *results;
+	GridPoint *results;
 
 
 	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
@@ -1271,7 +1261,7 @@ void init() {
 	Vec3 velvec1,point;
 
 	std::vector<int> res_index;
-	OctreePoint *results;
+	GridPoint *results;
 
 	total_number_of_particles_integration = 0;
 	int file_cntr=0;	
@@ -1398,17 +1388,11 @@ std::string spaces{80 - 1, ' '};
  
 
     } else{
-
-    	// addOctreePoint(octree, point,weight,dia_index,velvec1);
-    	// ::cout << "Inserted Data Before" << results->getRecNum() << "\n";
     		results->insertWeight(weight);
     		results->insertWeight_Iter(weight);
     		results->insertIndex(dia_index);
     		results->insertVelocity(velvec1);
     		results->addRecord();
-		// ::cout << "Inserted Data After" << results->getRecNum() << "\n";
-
-
     }
 
     // ORIGINAL
@@ -1525,7 +1509,7 @@ void iteration(const double radial_difference) {
 
   const char * cver_datafile;
 	std::vector<int> res_index;
-	OctreePoint *results;
+	GridPoint *results;
 	// std::vector<float> results_weights;
 
 	::cout << "Checking All Weights" << std::endl;
@@ -1751,8 +1735,6 @@ void iteration(const double radial_difference) {
     	::printf("DOES THIS EVER HAPPEN?\n");::fflush(stdout);
     	perror ("No particles found in the grid - This should never happen, email the code author!");
     	abort();
-    	// weight=particle_weight[parID];
-    	// addOctreePoint(octree_prev, point,particle_weight[parID],dia_index,velvec1);
     	cntr+=1;
     }
  
@@ -1959,7 +1941,7 @@ std::vector<double> particle_weight;
 
   const char * cver_datafile;
 	std::vector<int> res_index;
-	OctreePoint *results;
+	GridPoint *results;
 	// std::vector<float> results_weights;
 
 	::cout << "Checking All Weights" << std::endl;
@@ -2087,7 +2069,6 @@ std::vector<double> particle_weight;
     else {
     	// ::printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
     	// weight=particle_weight[parID];
-    	// addOctreePoint(octree_prev, point,particle_weight[parID],dia_index,velvec1);
     	cntr+=1;
     }
  
@@ -2146,7 +2127,7 @@ void calculate_collisional_lifetime_plot(){
 	string file_to_load;
 	const char * cver_datafile;
 	std::vector<int> res_index;
-	OctreePoint *results;
+	GridPoint *results;
 	int cntr=0;
 	int imp_index;
 	int i1_max;
@@ -2263,7 +2244,6 @@ collisional_total_tau += tau_coll/t_record;
 else {
 // ::printf("DOES THIS EVER HAPPEN?\n");fflush(stdout);
 // weight=particle_weight[parID];
-// addOctreePoint(octree_prev, point,particle_weight[parID],dia_index,velvec1);
 	cntr+=1;
 }
 
@@ -2369,7 +2349,6 @@ int main(int argc, char **argv) {
 	double T;
 	int iter_count = 0;
 	float tree_difference = 1.0;
-	// std::vector<OctreePoint*> results;
 	
 	std::string line;
 
