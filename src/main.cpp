@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
-#include <algorithm>
+// #include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -9,69 +9,46 @@
 #include <cfenv>
 #define _USE_MATH_DEFINES
 #include "math.h"
-#include "Octree.h"
 #include "Grid3D.h"
 #include "Stopwatch.h"
 #include "Constraints.h"
 #include "Outputs.h"
+#include "Records.h"
+#include "Settings.h"
+#include "FreeParameters.h"
+#include "Elementary_Functions.h"
 #include <boost/algorithm/string/classification.hpp> // Include boost::for is_any_of
-#include <boost/algorithm/string/split.hpp>			 // Include for boost::split
-
-// Definitions of constants
-const double auday2ms = double(149597900000e0 / 86400.0); // au per day to meters per second conversion
-const double au = double(149597900000e0);				  // au in meters
-const double GM_sun = double(1.32712440018e20);			  // Graviational parameter of the Sun
-const double GM_earth = double(3.986004418e14);			  // Graviational parameter of the Earth
-const double deg2rad = double(0.0174532925199e0);		  // Conversion from degrees to radians
-const double rad2deg = double(1.0 / deg2rad);
+#include <sys/stat.h>
+// #include <boost/algorithm/string/split.hpp>			 // Include for boost::split
 
 // Define namespaces
-// using namespace grid_octree;
 using namespace petrpokorny;
 using namespace std;
 
-// Global variables
-double angle_diff = cos(10.0 / 180.0 * M_PI); // 10 degrees - the angular difference between two particle velocity vectors - for merging
-double ratio_diff = 0.10;					  // 10% - the velocity magnitude difference between two vectors - for merging
-Vec3 dr = Vec3(.025, .025, .025);
-double volume_unit = dr.x * dr.y * dr.z * 8.0 * pow(au, 3.0); // Volume of one binning box in m3
-double octree_limit = 10.0;
-double initial_weight = 1.0;
-double intended_cloud_area = 2e17; // This is the total cloud cross-section we want to achieve
-double mass_accreted_at_Earth = 0.0;
-int total_number_of_particles_integration;
-std::vector<double> TEST_probabilities;
 
-std::vector<float> unique_diameters;	 // Contains unique diameters from all datafiles - this is done in the init() function
-std::vector<double> SFD_profile;		 // Contains unique diameters from all datafiles - this is done in the init() function
-std::vector<double> SFD_profile_Kessler; // Contains unique diameters from all datafiles - this is done in the init() function
-std::vector<vector<double>> SFD_array;
-std::vector<double> temp_diameters; // Mid-values of SFD diameters - FINISH THIS
-std::vector<vector<double>> Integration_Setup_array;
+
+double finish_critetion = 1e-2;
+
+// Internal variables Variables
+
+double timer;
+int iter_count = 0;
 
 std::string work_directory;
 
 Constraints_Double My_Constraints;
 Constraints_Double My_Measurements;
 
-Outputs My_Outputs;
-
 int output_switch = 0;
 
-// Free parameters:
-double As;
-double Bs;
-double alpha;
-double beta;
-double Dmid; // In micrometers
-double N0;
-double Dmax;
-double comet_pericenter_power;
-double particle_density; // In kg m^-3
-double pericenter_index;
+//Input parameters
+int load_save_switch;
+int reweight_switch;
+int check_radar;
+int check_Earth_Mass;
 
-string radial_file = "Outputs_radial_output";
-string ecl_file = "Outputs_ecliptic_profile_output";
+string radial_file = "./Outputs/Outputs_radial_output";
+string ecl_file = "./Outputs/Outputs_ecliptic_profile_output";
 const char *cradial_file = radial_file.c_str();
 const char *cecl_file = ecl_file.c_str();
 FILE *pFile;
@@ -79,23 +56,14 @@ FILE *pFile1;
 FILE *pFile2;
 FILE *pFile3;
 FILE *pFile4;
+FILE *pFile5;
 
-FILE *pFile666;
 
-// Used for testing
 std::vector<Vec3> points;
-Grid3D *peterito;
-// Octree *octree;
-// Octree *octree_iteration;
-GridPoint *octreePoints;
+Grid3D *grid3Ddata;
 Vec3 qmin, qmax, r_scan;
 Vec3 point;
 
-vector<double> r_prof_init(10000);		 // Vector that keeps the radial profile for the 1st iteration
-vector<double> r_prof_iter(10000);		 // Vector that keeps the radial profile for the 2nd iteration
-vector<double> r_prof_brightness(10000); // Vector that keeps the radial profile for the 2nd iteration
-vector<double> ecl_profile(180);		 // Vector that keeps the ecliptic latitude profile
-vector<double> ecl_profile_mass(180);	 // Vector that keeps the ecliptic latitude profile
 
 std::string trim(const std::string &str,
 				 const std::string &whitespace = " \t")
@@ -110,416 +78,7 @@ std::string trim(const std::string &str,
 	return str.substr(strBegin, strRange);
 }
 
-void Initialize_1D_Array(std::vector<double> &init_array, int xdim)
-{
-	init_array.resize(xdim);
-}
 
-void Initialize_2D_Array(std::vector<vector<double>> &init_array, int xdim, int ydim)
-{
-	init_array.resize(xdim);
-	for (int i = 0; i < xdim; i++)
-	{
-		init_array[i].resize(ydim);
-	}
-}
-
-void Initialize_Outputs()
-{
-	// CHANGE - unfinished and dirty - redo it
-	int xdim = peterito->data.size();
-	int ydim = peterito->data[0].size();
-
-	Initialize_2D_Array(My_Outputs.disk_profile_face_on_number, xdim, ydim);
-	Initialize_2D_Array(My_Outputs.disk_profile_face_on_brightness, xdim, ydim);
-	Initialize_2D_Array(My_Outputs.disk_profile_face_on_impact_velocity, xdim, ydim);
-
-	Initialize_2D_Array(My_Outputs.disk_profile_edge_on_number, xdim, ydim);
-	Initialize_2D_Array(My_Outputs.disk_profile_edge_on_brightness, xdim, ydim);
-	Initialize_2D_Array(My_Outputs.disk_profile_edge_on_impact_velocity, xdim, ydim);
-
-	Initialize_2D_Array(My_Outputs.disk_profile_face_on_massloss, xdim, ydim);
-	Initialize_2D_Array(My_Outputs.disk_profile_edge_on_massloss, xdim, ydim);
-	Initialize_1D_Array(My_Outputs.disk_profile_radial_massloss, 10000);
-
-	::cout << "Check Output Size:" << std::endl;
-	::cout << "Profile 1 size: " << My_Outputs.disk_profile_face_on_number.size() << "\t" << My_Outputs.disk_profile_face_on_number[0].size() << std::endl;
-	::cout << "Profile 2 size: " << My_Outputs.disk_profile_face_on_brightness.size() << "\t" << My_Outputs.disk_profile_face_on_brightness[0].size() << std::endl;
-	::cout << "Profile 3 size: " << My_Outputs.disk_profile_face_on_impact_velocity.size() << "\t" << My_Outputs.disk_profile_face_on_impact_velocity[0].size() << std::endl;
-	::cout << "Profile 4 size: " << My_Outputs.disk_profile_edge_on_number.size() << "\t" << My_Outputs.disk_profile_edge_on_number[0].size() << std::endl;
-	::cout << "Profile 5 size: " << My_Outputs.disk_profile_edge_on_brightness.size() << "\t" << My_Outputs.disk_profile_edge_on_brightness[0].size() << std::endl;
-	::cout << "Profile 6 size: " << My_Outputs.disk_profile_edge_on_impact_velocity.size() << "\t" << My_Outputs.disk_profile_edge_on_impact_velocity[0].size() << std::endl;
-}
-
-void Initiate_Output_Files()
-{
-	FILE *pFile_temp;
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Number", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Brightness", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Impact_Velocity", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Number", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Brightness", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Impact_Velocity", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Mass_Accreted_Kessler", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_MassLoss", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_MassLoss", "w+");
-	::fclose(pFile_temp);
-	pFile_temp = fopen("Outputs_Disk_Profile_Radial_MassLoss", "w+");
-	::fclose(pFile_temp);
-}
-
-void Print_Outputs_Big(int file_counter, double refactor = 1.0)
-{
-
-	std::vector<int> grid_index = peterito->getIndexes(point); // x,y, and z
-	int x = peterito->data.size();
-	int y = peterito->data[0].size();
-	int z = peterito->data[0][0].size();
-
-	FILE *pFile_temp;
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Number", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			if (My_Outputs.disk_profile_face_on_number[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_face_on_number[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Brightness", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			if (My_Outputs.disk_profile_face_on_brightness[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_face_on_brightness[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_Impact_Velocity", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			if (My_Outputs.disk_profile_face_on_number[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_face_on_impact_velocity[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Number", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			if (My_Outputs.disk_profile_edge_on_number[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_edge_on_number[i][j] * refactor, file_counter);
-			}
-		};
-	}
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Brightness", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			if (My_Outputs.disk_profile_edge_on_brightness[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_edge_on_brightness[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_Impact_Velocity", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			if (My_Outputs.disk_profile_edge_on_number[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_edge_on_impact_velocity[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	///
-	pFile_temp = fopen("Outputs_Disk_Profile_Face_On_MassLoss", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			if (My_Outputs.disk_profile_face_on_massloss[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_face_on_massloss[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Edge_On_MassLoss", "a+");
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			if (My_Outputs.disk_profile_edge_on_massloss[i][j] > 0.0)
-			{
-				::fprintf(pFile_temp, "%.5f %.5f %13.5e %d \n", dr[0] + i * 2.0 * dr[0] - octree_limit, dr[1] + j * 2.0 * dr[1] - octree_limit, My_Outputs.disk_profile_edge_on_massloss[i][j] * refactor, file_counter);
-			}
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-
-	pFile_temp = fopen("Outputs_Disk_Profile_Radial_MassLoss", "a+");
-	// for (int i=0;i<(int)My_Outputs.disk_profile_radial_massloss.size(); ++i){if(My_Outputs.disk_profile_radial_massloss[i] >0.0) {::fprintf(pFile_temp,"%.5f %13.5e %d\n", i*dr.x*2.0+dr.x,My_Outputs.disk_profile_radial_massloss[i]*refactor, file_counter );}	} ;  ::fprintf(pFile_temp,"\n");	::fclose(pFile_temp);
-	for (int i = 0; i < (int)My_Outputs.disk_profile_radial_massloss.size(); ++i)
-	{
-		if (My_Outputs.disk_profile_radial_massloss[i] > 0.0)
-		{
-			::fprintf(pFile_temp, "%.5f %13.5e %d\n", (i + 0.5) * (octree_limit) / (float)My_Outputs.disk_profile_radial_massloss.size(), My_Outputs.disk_profile_radial_massloss[i] * refactor, file_counter);
-		}
-	};
-	::fprintf(pFile_temp, "\n");
-	::fclose(pFile_temp);
-}
-
-void Print_Outputs_Small(int file_counter, double refactor = 1.0)
-{
-
-	std::vector<int> grid_index = peterito->getIndexes(point); // x,y, and z
-	int x = peterito->data.size();
-	int y = peterito->data[0].size();
-	int z = peterito->data[0][0].size();
-
-	FILE *pFile_temp;
-
-	pFile_temp = fopen("Outputs_Mass_Accreted_Kessler", "a+");
-	::fprintf(pFile_temp, "%13.5e %d \n", mass_accreted_at_Earth * refactor, file_counter);
-	::fclose(pFile_temp);
-}
-
-void Zero_Outputs()
-{
-
-	int x = peterito->data.size();
-	int y = peterito->data[0].size();
-	int z = peterito->data[0][0].size();
-
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			My_Outputs.disk_profile_face_on_number[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			My_Outputs.disk_profile_face_on_brightness[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			My_Outputs.disk_profile_face_on_impact_velocity[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			My_Outputs.disk_profile_edge_on_number[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			My_Outputs.disk_profile_edge_on_brightness[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			My_Outputs.disk_profile_edge_on_impact_velocity[i][j] = 0.0;
-		}
-	}
-
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < y; ++j)
-		{
-			My_Outputs.disk_profile_face_on_massloss[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < x; ++i)
-	{
-		for (int j = 0; j < z; ++j)
-		{
-			My_Outputs.disk_profile_edge_on_massloss[i][j] = 0.0;
-		}
-	}
-	for (int i = 0; i < (int)My_Outputs.disk_profile_radial_massloss.size(); ++i)
-	{
-		My_Outputs.disk_profile_radial_massloss[i] = 0.0;
-	}
-}
-
-void record_disk_profiles(Vec3 point, float weight, float diameter, float collision_velocity)
-{
-	std::vector<int> grid_index = peterito->getIndexes(point); // x,y, and z
-
-	int x = grid_index[0];
-	int y = grid_index[1];
-	int z = grid_index[2];
-
-	float heliocentric_distance = sqrt(point.x * point.x + point.y * point.y + point.z * point.z);
-	float flux_at_distance = 1.0 / (heliocentric_distance * heliocentric_distance);
-	float cross_section = pow(diameter, 2.0) * 0.25 * M_PI * 1e-12; // diameter is in micrometers
-
-	My_Outputs.disk_profile_face_on_number[x][y] += weight;
-	My_Outputs.disk_profile_edge_on_number[x][z] += weight;
-
-	My_Outputs.disk_profile_face_on_brightness[x][y] += weight * flux_at_distance * cross_section;
-	My_Outputs.disk_profile_edge_on_brightness[x][z] += weight * flux_at_distance * cross_section;
-
-	My_Outputs.disk_profile_face_on_impact_velocity[x][y] += weight * collision_velocity;
-	My_Outputs.disk_profile_edge_on_impact_velocity[x][z] += weight * collision_velocity;
-}
-
-void record_disk_mass_loss(Vec3 point, float mass_loss)
-{
-	std::vector<int> grid_index = peterito->getIndexes(point); // x,y, and z
-
-	int x = grid_index[0];
-	int y = grid_index[1];
-	int z = grid_index[2];
-
-	float ecliptic_distance = sqrt(point.x * point.x + point.y * point.y);
-
-	My_Outputs.disk_profile_face_on_massloss[x][y] += mass_loss;
-	My_Outputs.disk_profile_edge_on_massloss[x][z] += mass_loss;
-
-	// int central_index = floor(octree_limit/dr.x * 0.5); // getting the ecliptic index
-
-	int gridPoint_int = floor(ecliptic_distance / (octree_limit) * (int)My_Outputs.disk_profile_radial_massloss.size());
-	if (gridPoint_int < (int)My_Outputs.disk_profile_radial_massloss.size())
-	{
-		My_Outputs.disk_profile_radial_massloss[gridPoint_int] += mass_loss;
-	}
-	// if(gridPoint_int < (int)My_Outputs.disk_profile_radial_massloss.size() && z == central_index ) {My_Outputs.disk_profile_radial_massloss[gridPoint_int] += mass_loss;}
-	// We count only the points at the ecliptic; i.e. the central index
-}
-
-void radialProfile(std::vector<double> &r_prof, Vec3 point, float weight)
-{
-	// Adds particle weight to the radial profile vector
-	float gridPoint_rad;
-	int gridPoint_int;
-	gridPoint_rad = sqrt(point.x * point.x + point.y * point.y);
-	gridPoint_int = floor(gridPoint_rad / (dr.x * 2.0));
-	if (gridPoint_int < (int)r_prof.size())
-	{
-		r_prof[gridPoint_int] += weight;
-	}
-}
-
-void radialProfileCross(std::vector<double> &r_prof, Vec3 point, float weight, float cross_section)
-{
-	// Adds particle weight to the radial profile vector
-	float gridPoint_rad;
-	int gridPoint_int;
-	gridPoint_rad = sqrt(point.x * point.x + point.y * point.y);
-	gridPoint_int = floor(gridPoint_rad / (dr.x * 2.0));
-	if (gridPoint_int < (int)r_prof.size())
-	{
-		r_prof[gridPoint_int] += weight * cross_section;
-	}
-}
-
-void eclipticLatitudeProfile(std::vector<double> &ecl_prof, std::vector<double> &ecl_prof_mass, Vec3 point, float weight, float diameter)
-{
-	// Ecliptic latitude profile beyond 1 au - we calculate the cross-section per degree of the ecliptic latitude + We also calculate the mass for the same profile
-	// These two quantities are easy to compare to Nesvorny et al. (2011) etc.
-	float ecliptic_latitude;
-	int gridPoint_int;
-	double r_eclipt = sqrt(point.x * point.x + point.y * point.y);
-	double d_phi = 180.0 / float(ecl_prof.size());
-
-	if (r_eclipt > 1.0)
-	{
-		ecliptic_latitude = atan(point.z / (r_eclipt - 1.0)) * 180.0 / M_PI; // We are assuming that the particles in the cloud are not in 1:1 resonance with Earth and thus can be randomly oriented with respect to Earth
-		gridPoint_int = floor((ecliptic_latitude + 90.0) * d_phi);
-		ecl_prof[gridPoint_int] += weight * pow(diameter, 2.0) * 0.25 * M_PI * 1e-12;						 // Weight * Particle Cross-section - diameters are in micrometers so we have *1e-12
-		ecl_prof_mass[gridPoint_int] += weight * pow(diameter, 3.0) / 6.0 * M_PI * 1e-18 * particle_density; // Weight * Particle Cross-section - diameters are in micrometers so we have *1e-12
-	}
-}
-
-int find_diameter_index(float diameter)
-{
-	// Finds the diameter index in the SFD_array
-	for (int i = 0; i < (int)SFD_array.size(); i++)
-	{
-		if (float(SFD_array[i][0]) == diameter)
-		{
-			return i;
-		}
-	}
-	::cout << "Error finding dimameters, something is terribly wrong, this should not happen at all! --- function int find_diameter_index(float diameter)\n";
-	exit(EXIT_FAILURE);
-	return 999;
-}
-
-void SFD_1AU_Profile(std::vector<double> &SFD_profile, Vec3 point, float weight, float diameter)
-{
-	// Ecliptic latitude profile beyond 1 au - we calculate the cross-section per degree of the ecliptic latitude + We also calculate the mass for the same profile
-	// These two quantities are easy to compare to Nesvorny et al. (2011) etc.
-
-	int dia = find_diameter_index(diameter);
-	// if(point.norm() > 1.0-0.025 && point.norm() < 1.0+0.025) SFD_profile[dia] += weight;
-	SFD_profile[dia] += weight;
-}
-
-void SFD_1AU_Profile_Kessler(std::vector<double> &SFD_profile, Vec3 point, float weight, float diameter)
-{
-	// Ecliptic latitude profile beyond 1 au - we calculate the cross-section per degree of the ecliptic latitude + We also calculate the mass for the same profile
-	// These two quantities are easy to compare to Nesvorny et al. (2011) etc.
-
-	int dia = find_diameter_index(diameter);
-	SFD_profile_Kessler[dia] += weight;
-}
 
 float dotProduct(Vec3 v1, Vec3 v2) { return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z; }
 
@@ -648,10 +207,10 @@ void readMyLineBinary(ifstream &file, Vec3 &point, Vec3 &velvec1, int &parID, fl
 	delete memblock_elms;
 }
 
-Vec3 gridVec3(Vec3 v, Vec3 dr) // Attaches the point to the 3d grid defined by dr
-{
-	return Vec3(round(v.x * 0.5 / dr.x) * dr.x * 2.0, round(v.y * 0.5 / dr.y) * dr.y * 2.0, round(v.z * 0.5 / dr.z) * dr.z * 2.0);
-}
+// Vec3 gridVec3(Vec3 v, Vec3 dr) // Attaches the point to the 3d grid defined by dr
+// {
+// 	return Vec3(round(v.x * 0.5 / dr.x) * dr.x * 2.0, round(v.y * 0.5 / dr.y) * dr.y * 2.0, round(v.z * 0.5 / dr.z) * dr.z * 2.0);
+// }
 
 void checkRadialProfile(FILE *pFile_w, std::vector<double> &r_prof, int counter, float reweighting_factor = 1.0)
 {
@@ -659,7 +218,7 @@ void checkRadialProfile(FILE *pFile_w, std::vector<double> &r_prof, int counter,
 	{
 		if (r_prof[i] > 0)
 		{
-			::fprintf(pFile_w, "%.5f %13.5e %d %13.5e\n", i * dr.x * 2.0 + dr.x, r_prof[i] * reweighting_factor, counter, r_prof_brightness[i] * reweighting_factor);
+			::fprintf(pFile_w, "%.5f %13.5e %d %13.5e\n", i * settings_dr.x + settings_dr.x * 0.5, r_prof[i] * reweighting_factor, counter, r_prof_brightness[i] * reweighting_factor);
 		}
 	}
 }
@@ -803,7 +362,7 @@ void getCollProbWithEarth(Vec3 r_vec, Vec3 v_vec, Vec3 r_pl_vec, Vec3 v_pl_vec, 
 	{
 		prob = 0.0;
 		prob_unfoc = 0.0;
-		::printf("Problem with the prob:\n");
+		::printf("Problem with the impact probability calculation - function: getCollProbWithEarth \n");
 		::printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a / 1.5e11, e, acos(sqrt(cos2i)) * 180.0 / M_PI, v_rel, grav_foc, energy, v_pl, v);
 		::printf("Method check - prob: %13.5e, cosphi: %13.5e, cosgamma: %13.5e, peri: %13.5e, rpl: %13.5e, apo: %13.5e, H2: %13.5e, HZ2: %13.5e,\n", prob, cosphi, cosgamma, peri, r_pl, apo, H2, HZ2);
 		::printf("Method check - x: %13.5e, y: %13.5e, z: %13.5e, vx: %13.5e, vy: %13.5e, vz: %13.5e, H2/GMa: %13.5e, \n", r_vec[0], r_vec[1], r_vec[2], v_vec[0], v_vec[1], v_vec[2], H2 / (GM * a));
@@ -813,8 +372,6 @@ void getCollProbWithEarth(Vec3 r_vec, Vec3 v_vec, Vec3 r_pl_vec, Vec3 v_pl_vec, 
 	// prob can be really small in kms units, but it shouldn't go below 10e-38 in the solar system. Normally this value is above 10e-30 so we have 8 orders of magnitude cushion
 
 	// ::printf("Method check - a: %13.5e, e: %13.5e, inc: %13.5e, v_rel: %13.5e, grav_foc: %13.5e, energy: %13.5e, v_pl: %13.5e, v: %13.5e\n", a/1.5e11,e, acos(sqrt(cos2i))*180.0/M_PI,v_rel, grav_foc , energy, v_pl, v);
-
-	// TEST_probabilities.push_back(prob);
 
 	return;
 }
@@ -969,8 +526,8 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector, int iter_count)
 		Earth_v.x = -V0 * sin(true_anom);
 		Earth_v.y = V0 * cos(true_anom);
 		Earth_v.z = 0.0;
-		res_index = peterito->getIndexes(Earth_r); //
-		results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
+		res_index = grid3Ddata->getIndexes(Earth_r); //
+		results = &grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]];
 
 		if (results->getRecNum() > 0)
 		{
@@ -999,9 +556,10 @@ void calculate_Earth_Mass_Flux(std::vector<double> &mass_vector, int iter_count)
 			}
 		}
 		// results.clear();
-		::fprintf(pFile4, "%d %13.5e %d\n", i, mass_accreted, iter_count);
+		::fprintf(pFile5, "%d %13.5e %d\n", i, mass_accreted, iter_count);
 		mass_vector.push_back(mass_accreted);
 	}
+	// ::fclose(pFile5);
 }
 
 void load_2D_helper(std::string filename, std::vector<double> &x_vec, std::vector<double> &y_vec)
@@ -1189,7 +747,7 @@ void record_radar_profile(float a, float e, float inc, float vg, float prob, int
 	// ::printf("Radar profile orbs:  %13.5e %13.5e %13.5e %13.5e %13.5e\n", a/au, e, inc, vg, v_radar);
 	// cin >> tester;
 
-	// CHANGE - QUICK HACK
+	// ATTENTION: This is works for now but should be changed later
 	radiant_source_name = "OTHER";
 	if (abs(ecc_lon - HE_CMOR_lon_center) < HE_CMOR_lon_width && abs(ecc_lat - HE_CMOR_lat_center) < HE_CMOR_lat_width)
 	{
@@ -1241,7 +799,7 @@ void record_radar_profile(float a, float e, float inc, float vg, float prob, int
 		}
 	}
 
-	// CHANGE - QUICK HACK
+	// ATTENTION: This is works for now but should be changed later
 	radiant_source_name = "OTHER";
 	if (abs(ecc_lon - HE_AMOR_lon_center) < HE_AMOR_lon_width && abs(ecc_lat - HE_AMOR_lat_center) < HE_AMOR_lat_width)
 	{
@@ -1397,16 +955,16 @@ double calculate_cloud_mass()
 	int rec_iter;
 	GridPoint *results;
 
-	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
+	// ::cout << "Test Cloud" << grid3Ddata->data.size() << "\t" << grid3Ddata->data[0].size() << "\t" << grid3Ddata->data[0][0].size() << "\n";
 
-	for (int i = 0; i < (int)peterito->data.size(); i++)
+	for (int i = 0; i < (int)grid3Ddata->data.size(); i++)
 	{
-		for (int j = 0; j < (int)peterito->data[0].size(); j++)
+		for (int j = 0; j < (int)grid3Ddata->data[0].size(); j++)
 		{
-			for (int k = 0; k < (int)peterito->data[0][0].size(); k++)
+			for (int k = 0; k < (int)grid3Ddata->data[0][0].size(); k++)
 			{
 
-				results = &peterito->data[i][j][k];
+				results = &grid3Ddata->data[i][j][k];
 
 				if (results->getRecNum() > 0)
 				{
@@ -1435,16 +993,14 @@ double calculate_cloud_area()
 	float diameter;
 	GridPoint *results;
 
-	// ::cout << "Test Cloud" << peterito->data.size() << "\t" << peterito->data[0].size() << "\t" << peterito->data[0][0].size() << "\n";
-
-	for (int i = 0; i < (int)peterito->data.size(); i++)
+	for (int i = 0; i < (int)grid3Ddata->data.size(); i++)
 	{
-		for (int j = 0; j < (int)peterito->data[0].size(); j++)
+		for (int j = 0; j < (int)grid3Ddata->data[0].size(); j++)
 		{
-			for (int k = 0; k < (int)peterito->data[0][0].size(); k++)
+			for (int k = 0; k < (int)grid3Ddata->data[0][0].size(); k++)
 			{
 
-				results = &peterito->data[i][j][k];
+				results = &grid3Ddata->data[i][j][k];
 
 				if (results->getRecNum() > 0)
 				{
@@ -1466,24 +1022,34 @@ double calculate_cloud_area()
 	return double(cloud_total_area);
 }
 
+
+// Main functions start here
+
+// This function reads all particle simulations from "COLL_datafile" that contains 3 columns:
+// (1) the path to the n-body simulation output
+// (2) particle diameter in micrometers
+// (3) perihelion distance parameter q* that is used for the Jupiter-family comet simulations - keep at 1.0 for no change in weighting
 void pre_init()
 {
-
+	// Variables
 	float diameter;
-
-	int parID;
 	float time_int;
 	float pericenter;
-	Vec3 velvec1, point;
+	
+	int parID;
 
 	Vec3 vec1, vec2;
+	Vec3 velvec1, point;
 
 	const char *cver_datafile;
-
+	
 	string line;
 	string file_to_load;
 
 	ifstream datafile(work_directory + "/./COLL_datafile");
+
+	::cout << "Function pre_init started" << ::endl;
+
 	if (datafile.is_open())
 	{
 		while (getline(datafile, line, '\n'))
@@ -1496,6 +1062,7 @@ void pre_init()
 			file_to_load = ReplaceAll(file_to_load, std::string(" "), std::string(""));
 			cver_datafile = file_to_load.c_str();
 
+			::cout << cver_datafile << ::endl;
 			ifstream myfile(cver_datafile, ios::in | ios::binary | ios::ate);
 
 			if (myfile.is_open())
@@ -1508,11 +1075,12 @@ void pre_init()
 					if (myfile.eof())
 						break;
 
-					if (time_int < 0.1)
+					// We want to read only the initial state
+					if (time_int < 1e-6)
 					{
 						Integration_Setup_array[Integration_Setup_array.size() - 1][1] += 1.0;
 					}
-					if (time_int > 0.1)
+					if (time_int > 1e-6)
 					{
 						break;
 					}
@@ -1521,14 +1089,18 @@ void pre_init()
 				myfile.close();
 			}
 			else
-				::cout << "Unable to open binary file\n";
+			{
+				::cout << "Unable to open binary file" << "\t" << file_to_load << "\n"; ::fflush(stdout);
+				abort();
+				// ::exit(EXIT_FAILURE);
+				}
 
-			// octree->initialize_Second_weights();
 		}
 		datafile.close();
 	}
 	else
 		::cout << "Unable to open file - COLL_datafile\n";
+		// ::exit(EXIT_FAILURE);
 
 	// Create a vector of unique diameters for the SFD calculation
 	std::sort(unique_diameters.begin(), unique_diameters.end());		  // First we sort it because we do not require sorted inputs
@@ -1557,8 +1129,12 @@ void pre_init()
 		::cout << "Diameter check: " << unique_diameters[k3] << "\t" << tmp_array[k3] << "\n";
 	}
 
+	::cout << "Function pre_init finished" << ::endl;
 	return;
 }
+
+
+
 
 void init()
 {
@@ -1568,7 +1144,7 @@ void init()
 	// Meteoroid orbital elements
 	float a_met, e_met, inc_met, vg_met;
 	double test_zody_mass = 0.0, test_zody_area = 0.0;
-	float deltaV;
+	float deltaV = 0.0;
 
 	int rec_iter, breakable;
 
@@ -1664,12 +1240,12 @@ void init()
 					// ::printf("TEST: %.5f %.5f %.5f %.5f %.5f %.5f\n", point.x,point.y,point.z,velvec1.x,velvec1.y,velvec1.z); fflush(stdout);
 					// cin >> pink;
 
-					if (point.maxComponent() >= octree_limit || point.minComponent() <= -octree_limit)
+					if (point.maxComponent() >= settings_grid_half_size || point.minComponent() <= -settings_grid_half_size)
 					{
 						continue;
 					}										 // removes the points beyond the octree dimension
 															 // std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
-					res_index = peterito->getIndexes(point); //
+					res_index = grid3Ddata->getIndexes(point); //
 					for (int jj = 0; jj < 3; jj++)
 					{
 						if (res_index[jj] >= 400 || res_index[jj] < 0)
@@ -1677,8 +1253,8 @@ void init()
 					}
 
 					// octree->getPointsInsideBox({point.x-dr.x,point.y-dr.y,point.z-dr.z}, {point.x+dr.x,point.y+dr.y,point.z+dr.z}, results); //
-					// ::cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
-					results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
+					// ::cout << "First Test" << grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
+					results = &grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]];
 
 					if (results->getRecNum() > 0)
 					{
@@ -1727,19 +1303,19 @@ void init()
 					float impact_prob_with_earth;
 					float impact_prob_with_probe;
 					getCollProbWithEarth(point * au, velvec1 * auday2ms, Vec3(1.5e11, 0, 0), Vec3(0, -29800.0, 0), 11200e0, M_PI * 6371e3 * 6371e3, 86400.0, a_met, e_met, inc_met, vg_met, impact_prob_with_earth, impact_prob_with_probe); // Probability per day
-					mass_accreted_at_Earth += impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1] * SFD_array[dia_index][2];
+					My_Outputs.mass_accreted_at_Earth += impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1] * SFD_array[dia_index][2];
 					record_radar_profile(a_met, e_met, inc_met, vg_met, impact_prob_with_earth * particle_weight[parID], dia_index, "CMOR");
 					record_radar_profile(a_met, e_met, inc_met, vg_met, impact_prob_with_earth * particle_weight[parID], dia_index, "AMOR");
 					if (output_switch == 1)
 					{
-						record_disk_profiles(point, particle_weight[parID] * SFD_array[dia_index][1], diameter, deltaV * auday2ms);
+						record_disk_profiles(grid3Ddata,point, particle_weight[parID] * SFD_array[dia_index][1], diameter, deltaV * auday2ms);
 					}
 
-					radialProfile(r_prof_iter, point, particle_weight[parID] * SFD_array[dia_index][1]);													  // adds the read line to the radial profile "r_prof"
-					radialProfileCross(r_prof_brightness, point, particle_weight[parID] * SFD_array[dia_index][1], pow(diameter, 2.0) * 0.25 * M_PI * 1e-12); // adds the read line to the radial profile "r_prof"
-					eclipticLatitudeProfile(ecl_profile, ecl_profile_mass, point, particle_weight[parID] * SFD_array[dia_index][1], diameter);
-					SFD_1AU_Profile(SFD_profile, point, impact_prob_with_probe * particle_weight[parID] * SFD_array[dia_index][1], diameter);
-					SFD_1AU_Profile_Kessler(SFD_profile_Kessler, point, impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1], diameter);
+					record_radialProfile(r_prof_iter, point, particle_weight[parID] * SFD_array[dia_index][1]);													  // adds the read line to the radial profile "r_prof"
+					record_radialProfileCross(r_prof_brightness, point, particle_weight[parID] * SFD_array[dia_index][1], pow(diameter, 2.0) * 0.25 * M_PI * 1e-12); // adds the read line to the radial profile "r_prof"
+					record_eclipticLatitudeProfile(ecl_profile, ecl_profile_mass, point, particle_weight[parID] * SFD_array[dia_index][1], diameter, particle_density);
+					record_SFDProfile(SFD_profile, impact_prob_with_probe * particle_weight[parID] * SFD_array[dia_index][1], diameter);
+					record_SFDProfile(SFD_profile_Kessler, impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1], diameter);
 
 					test_zody_area += particle_weight[parID] * SFD_array[dia_index][1] * pow(diameter, 2.0) * 0.25 * M_PI * 1e-12;
 					test_zody_mass += particle_weight[parID] * SFD_array[dia_index][1] * pow(diameter, 3.0) / 6.0 * M_PI * 1e-18 * particle_density;
@@ -1768,7 +1344,7 @@ void init()
 	double initial_cloud_area = calculate_cloud_area();
 	double init_reweight = intended_cloud_area / initial_cloud_area;
 	::cout << "Total Cloud Area: " << initial_cloud_area << std::endl;
-	::cout << "Reweighting the area of the cloud by a factor " << init_reweight << "New weight:" << initial_weight * init_reweight << "\n";
+	::cout << "Reweighting the area of the cloud by a factor " << init_reweight << ", New weight: " << initial_weight * init_reweight << "\n";
 	initial_weight = initial_weight * init_reweight;
 
 	checkRadialProfile(pFile, r_prof_iter, 0, init_reweight);
@@ -1778,18 +1354,20 @@ void init()
 	checkSFDProfile(pFile2, SFD_profile, 0, init_reweight);
 	::fprintf(pFile2, "\n");
 
-	write_radar_profile(pFile3, 0, "CMOR");
+	if(check_radar) {  write_radar_profile(pFile3, 0, "CMOR"); 
 	::fprintf(pFile3, "\n");
 	write_radar_profile(pFile4, 0, "AMOR");
 	::fprintf(pFile4, "\n");
+	}
+
 	std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin());
 	std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
 	if (output_switch == 1)
 	{
-		Print_Outputs_Big(0, init_reweight);
+		Print_Outputs_Big(grid3Ddata, 0, init_reweight);
 	}
-	Print_Outputs_Small(0, init_reweight);
-	Zero_Outputs();
+	Print_Outputs_Small(grid3Ddata, 0, init_reweight);
+	Zero_Outputs(grid3Ddata);
 
 	return;
 }
@@ -1823,7 +1401,8 @@ void iteration(const double radial_difference)
 	float t_record;
 	float tau_coll;
 
-	double test_zody_mass = 0.0, test_zody_area = 0.0;
+	double test_zody_mass = 0.0; 
+	double test_zody_area = 0.0;
 
 	Vec3 velvec1, point;
 
@@ -1837,7 +1416,7 @@ void iteration(const double radial_difference)
 	// std::vector<float> results_weights;
 
 	::cout << "Checking All Weights" << std::endl;
-	peterito->check_all_Weights();
+	grid3Ddata->check_all_Weights();
 
 	// octree_next->get_all_weights(results_weights);
 	// james = 0;
@@ -1860,8 +1439,8 @@ void iteration(const double radial_difference)
 	}
 	// setting_weight = 0.1;
 	::printf("Setting iteration weights: %.5f, %.5f, Radial Difference: %14.5e\n", setting_weight, 1.0 - setting_weight, radial_difference);
-	peterito->averagePreIterWeights(setting_weight); // Sets weights to 0.5*weight1 + 0.5*weight2
-	peterito->zero_Iter_Weights();				   // Sets Iter weights to 0.0
+	grid3Ddata->averagePreIterWeights(setting_weight); // Sets weights to 0.5*weight1 + 0.5*weight2
+	grid3Ddata->zero_Iter_Weights();				   // Sets Iter weights to 0.0
 	// ::printf("Before set\n"); fflush(stdout);
 
 	// }
@@ -1899,7 +1478,7 @@ void iteration(const double radial_difference)
 	int dia_index;
 	// vector< pair <float,float> > SFD_vector;  // first are diameters, second is the SFD number for it
 
-	ifstream datafile("COLL_datafile");
+	ifstream datafile(work_directory + "/./COLL_datafile");
 	if (datafile.is_open())
 	{
 		while (getline(datafile, line, '\n'))
@@ -1957,12 +1536,12 @@ void iteration(const double radial_difference)
 						}
 					}
 
-					if (point.maxComponent() >= octree_limit || point.minComponent() <= -octree_limit)
+					if (point.maxComponent() >= settings_grid_half_size || point.minComponent() <= -settings_grid_half_size)
 					{
 						continue;
 					}										 // removes the points beyond the octree dimension
 															 // std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
-					res_index = peterito->getIndexes(point); //
+					res_index = grid3Ddata->getIndexes(point); //
 					for (int jj = 0; jj < 3; jj++)
 					{
 						if (res_index[jj] >= 400 || res_index[jj] < 0)
@@ -1970,13 +1549,13 @@ void iteration(const double radial_difference)
 					}
 
 					// octree->getPointsInsideBox({point.x-dr.x,point.y-dr.y,point.z-dr.z}, {point.x+dr.x,point.y+dr.y,point.z+dr.z}, results); //
-					// ::cout << "First Test" << peterito->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
-					results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
+					// ::cout << "First Test" << grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]].getRecNum() << "\n";
+					results = &grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]];
 
 					// octree_prev->getPointsInsideBox(point-dr, dr+point, results); //
 					// octree->getPointsInsideBox({point.x-dr.x,point.y-dr.y,point.z-dr.z}, {point.x+dr.x,point.y+dr.y,point.z+dr.z}, results); //
 
-					float collisional_lifetime = 0;
+					// float collisional_lifetime = 0;
 					float collisional_total_tau = 0;
 
 					float pre_collision_weight = particle_weight[parID];
@@ -1999,7 +1578,6 @@ void iteration(const double radial_difference)
 							// deltaV = deltaV * auday2ms;
 							deltaV = deltaV;
 
-							// CHANGE THIS
 							imp_index = results->getIndex(k);
 							impactor_energy = deltaV * deltaV * auday2ms * auday2ms * 0.5 * SFD_array[imp_index][2];
 							// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
@@ -2084,16 +1662,15 @@ void iteration(const double radial_difference)
 					// CONTINUE HERE - just put weight_loss into an array (face on, edge and radial)
 					if (output_switch == 1)
 					{
-						record_disk_mass_loss(point, weight_loss);
+						record_disk_mass_loss(grid3Ddata, point, weight_loss);
 					}
 
 					float impact_prob_with_earth;
 					float impact_prob_with_probe;
 					getCollProbWithEarth(point * au, velvec1 * auday2ms, Vec3(1.5e11, 0, 0), Vec3(0, -29800.0, 0), 11200e0, M_PI * 6371e3 * 6371e3, 86400.0, a_met, e_met, inc_met, vg_met, impact_prob_with_earth, impact_prob_with_probe); // Probability per day
-					// if(impact_prob_with_earth > 0.0) {::fprintf(pFile666, "%d %13.5e %13.5e %13.5e %13.5e %13.5e %13.5e\n", parID, time_int, a_met/au,e_met,inc_met,vg_met,impact_prob_with_earth);}
 
-					collisional_lifetime = 1.0 / collisional_total_tau;
-					mass_accreted_at_Earth += impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1] * SFD_array[dia_index][2];
+					// collisional_lifetime = 1.0 / collisional_total_tau;
+					My_Outputs.mass_accreted_at_Earth += impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1] * SFD_array[dia_index][2];
 
 					// da = 0.06, de = 0.01, dinc = 1.8, dvg = 0.8
 					// ::printf("Record particle: a: %13.5e, e: %13.5e,inc: %13.5e,vg: %13.5e, prob: %13.5e\n", a_met, e_met, inc_met, vg_met);
@@ -2103,14 +1680,14 @@ void iteration(const double radial_difference)
 					record_radar_profile(a_met, e_met, inc_met, vg_met, impact_prob_with_earth * particle_weight[parID], dia_index, "AMOR");
 					if (output_switch == 1)
 					{
-						record_disk_profiles(point, particle_weight[parID] * SFD_array[dia_index][1], diameter, deltaV * auday2ms);
+						record_disk_profiles(grid3Ddata, point, particle_weight[parID] * SFD_array[dia_index][1], diameter, deltaV * auday2ms);
 					}
 
-					radialProfile(r_prof_iter, point, particle_weight[parID] * SFD_array[dia_index][1]);													  // adds the read line to the radial profile "r_prof"
-					radialProfileCross(r_prof_brightness, point, particle_weight[parID] * SFD_array[dia_index][1], pow(diameter, 2.0) * 0.25 * M_PI * 1e-12); // adds the read line to the radial profile "r_prof"
-					eclipticLatitudeProfile(ecl_profile, ecl_profile_mass, point, particle_weight[parID] * SFD_array[dia_index][1], diameter);
-					SFD_1AU_Profile(SFD_profile, point, impact_prob_with_probe * particle_weight[parID] * SFD_array[dia_index][1], diameter);
-					SFD_1AU_Profile_Kessler(SFD_profile_Kessler, point, impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1], diameter);
+					record_radialProfile(r_prof_iter, point, particle_weight[parID] * SFD_array[dia_index][1]);													  // adds the read line to the radial profile "r_prof"
+					record_radialProfileCross(r_prof_brightness, point, particle_weight[parID] * SFD_array[dia_index][1], pow(diameter, 2.0) * 0.25 * M_PI * 1e-12); // adds the read line to the radial profile "r_prof"
+					record_eclipticLatitudeProfile(ecl_profile, ecl_profile_mass, point, particle_weight[parID] * SFD_array[dia_index][1], diameter, particle_density);
+					record_SFDProfile(SFD_profile, impact_prob_with_probe * particle_weight[parID] * SFD_array[dia_index][1], diameter);
+					record_SFDProfile(SFD_profile_Kessler, impact_prob_with_earth * particle_weight[parID] * SFD_array[dia_index][1], diameter);
 
 					test_zody_area += particle_weight[parID] * SFD_array[dia_index][1] * pow(diameter, 2.0) * 0.25 * M_PI * 1e-12;
 					test_zody_mass += particle_weight[parID] * SFD_array[dia_index][1] * pow(diameter, 3.0) / 6.0 * M_PI * 1e-18 * particle_density;
@@ -2127,7 +1704,7 @@ void iteration(const double radial_difference)
 	else
 		::cout << "Unable to open file\n";
 
-	// peterito->check_all_Weights();
+	// grid3Ddata->check_all_Weights();
 
 	::cout << "Testing Zone: Area" << test_zody_area << ", Mass: " << test_zody_mass << std::endl;
 	// checkRadialProfile(r_prof_iter, 1);
@@ -2194,7 +1771,7 @@ float solve_kepler_equation_for_TA(float M, float ecc)
 /// Solves Kepler Equation for given mean anomaly M, eccentricty ecc, and returns float true anomaly
 {
 	int i;
-	int iterations_to_converge;
+	// int iterations_to_converge;
 	int iteration_maximum = 20;
 	double sgn, E, f, error, es, ec, df, ddf, dddf, d1, d2, d3;
 	double max_error = 1e-10;
@@ -2235,7 +1812,7 @@ float solve_kepler_equation_for_TA(float M, float ecc)
 	if (error > max_error)
 		std::cout << "***Warning*** Orbit::keplers_eqn() failed to converge***\n";
 
-	iterations_to_converge = i;
+	// iterations_to_converge = i;
 	cosf = (cos(E) - ecc) / (1.0 - ecc * cos(E));
 	return acos(cosf);
 }
@@ -2245,21 +1822,23 @@ void calculate_collisional_lifetime_map()
 
 	std::vector<double> particle_weight;
 
-	float setting_weight;
-	int rec_iter, breakable;
+	// float setting_weight;
+	int rec_iter;
+	// int breakable;
 
 	// Meteoroid orbital elements
-	float a_met, e_met, inc_met, vg_met;
+	float a_met, e_met, inc_met;
+	// float vg_met;
 
 	// float weight;
-	float cosphi;
-	float ratio;
+	// float cosphi;
+	// float ratio;
 	float diameter;
-	float old_diameter;
-	float weight;
-	int parID;
-	float time_int;
-	float current_integration_time = 9e99; // Make this number high so it always higher than the first line
+	// float old_diameter;
+	// float weight;
+	// int parID;
+	// float time_int;
+	// float current_integration_time = 9e99; // Make this number high so it always higher than the first line
 	float deltaV;
 	float impactor_weight;
 	float particle_cross_section;
@@ -2267,26 +1846,27 @@ void calculate_collisional_lifetime_map()
 	float t_record;
 	float tau_coll;
 
-	double test_zody_mass = 0.0, test_zody_area = 0.0;
+	// double test_zody_mass = 0.0;
+	// double test_zody_area = 0.0;
 
 	Vec3 velvec1, point;
 
-	char debug_char;
+	// char debug_char;
 
 	string file_to_load;
 
-	const char *cver_datafile;
+	// const char *cver_datafile;
 	std::vector<int> res_index;
 	GridPoint *results;
 	// std::vector<float> results_weights;
 
 	::cout << "Checking All Weights" << std::endl;
-	peterito->check_all_Weights();
+	grid3Ddata->check_all_Weights();
 
 	int cntr = 0;
 	int imp_index;
 	int i1_max;
-	float pericenter;
+	// float pericenter;
 	float Qbind;
 	float impactor_energy;
 
@@ -2353,21 +1933,21 @@ void calculate_collisional_lifetime_map()
 
 							convert_orbel_to_xyz(a_met, e_met, inc_met, capom_met, omega_met, true_anomaly_met, point, velvec1);
 
-							if (point.maxComponent() >= octree_limit || point.minComponent() <= -octree_limit)
+							if (point.maxComponent() >= settings_grid_half_size || point.minComponent() <= -settings_grid_half_size)
 							{
 								continue;
 							}										 // removes the points beyond the octree dimension
 																	 // std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
-							res_index = peterito->getIndexes(point); //
+							res_index = grid3Ddata->getIndexes(point); //
 							for (int jj = 0; jj < 3; jj++)
 							{
 								if (res_index[jj] >= 400 || res_index[jj] < 0)
 									::cout << "index:" << jj << "\t is " << res_index[jj] << "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n";
 							}
 
-							results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
+							results = &grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]];
 
-							float collisional_lifetime = 0;
+							// float collisional_lifetime = 0;
 							float collisional_total_tau = 0;
 
 							if (results->getRecNum() > 0)
@@ -2388,7 +1968,6 @@ void calculate_collisional_lifetime_map()
 									// deltaV = deltaV * auday2ms;
 									deltaV = deltaV;
 
-									// CHANGE THIS
 									imp_index = results->getIndex(k);
 									impactor_energy = deltaV * deltaV * auday2ms * auday2ms * 0.5 * SFD_array[imp_index][2];
 									// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
@@ -2431,39 +2010,34 @@ void calculate_collisional_lifetime_plot()
 
 	std::vector<double> particle_weight;
 
-	float setting_weight;
-	int rec_iter, breakable;
+	// float setting_weight;
+	int rec_iter;
+	// int breakable;
 
 	// Meteoroid orbital elements
-	float a_met, e_met, inc_met, vg_met;
+	float a_met, e_met, inc_met;
 
 	// float weight;
-	float cosphi;
-	float ratio;
+	// float cosphi;
+	// float ratio;
 	float diameter;
-	float old_diameter;
-	float weight;
-	int parID;
-	float time_int;
-	float current_integration_time = 9e99; // Make this number high so it always higher than the first line
+	// float old_diameter;
+	// int parID;
 	float deltaV;
 	float impactor_weight;
 	float particle_cross_section;
 	float particle_mass;
 	float t_record;
 	float tau_coll;
-	double test_zody_mass = 0.0, test_zody_area = 0.0;
 
 	Vec3 velvec1, point;
-	char debug_char;
+	// char debug_char;
 	string file_to_load;
-	const char *cver_datafile;
 	std::vector<int> res_index;
 	GridPoint *results;
 	int cntr = 0;
 	int imp_index;
 	int i1_max;
-	float pericenter;
 	float Qbind;
 	float impactor_energy;
 	float factor1;
@@ -2524,21 +2098,21 @@ void calculate_collisional_lifetime_plot()
 
 							convert_orbel_to_xyz(a_met, e_met, inc_met, capom_met, omega_met, true_anomaly_met, point, velvec1);
 
-							if (point.maxComponent() >= octree_limit || point.minComponent() <= -octree_limit)
+							if (point.maxComponent() >= settings_grid_half_size || point.minComponent() <= -settings_grid_half_size)
 							{
 								continue;
 							} // removes the points beyond the octree dimension
 							// std::cout << point.x << "\t" << point.y << "\t" << point.z << "\n";
-							res_index = peterito->getIndexes(point); //
+							res_index = grid3Ddata->getIndexes(point); //
 							for (int jj = 0; jj < 3; jj++)
 							{
 								if (res_index[jj] >= 400 || res_index[jj] < 0)
 									::cout << "index:" << jj << "\t is " << res_index[jj] << "\t" << point.x << "\t" << point.y << "\t" << point.z << "\n";
 							}
 
-							results = &peterito->data[res_index[0]][res_index[1]][res_index[2]];
+							results = &grid3Ddata->data[res_index[0]][res_index[1]][res_index[2]];
 
-							float collisional_lifetime = 0;
+							// float collisional_lifetime = 0;
 							float collisional_total_tau = 0;
 
 							if (results->getRecNum() > 0)
@@ -2559,7 +2133,6 @@ void calculate_collisional_lifetime_plot()
 									// deltaV = deltaV * auday2ms;
 									deltaV = deltaV;
 
-									// CHANGE THIS
 									imp_index = results->getIndex(k);
 									impactor_energy = deltaV * deltaV * auday2ms * auday2ms * 0.5 * SFD_array[imp_index][2];
 									// if(diameter>600) {::printf("Collision test: Qbind: %13.5e, Impactor Energy: %13.5e, Collision: %d,DeltaV: %13.5e, Target Diameter: %.5f, Impactor Diameter: %.5f\n", Qbind, impactor_energy, Qbind > impactor_energy, deltaV, diameter, SFD_array[imp_index][0]); fflush(stdout); cin >> pink;}
@@ -2597,29 +2170,32 @@ void calculate_collisional_lifetime_plot()
 	return;
 }
 
-int main(int argc, char **argv)
+
+void check_directories()
 {
+    // Path to the directory
+    const char* dir = "./Outputs/";
+ 
+    // Store the directory check metadata
+    struct stat sb;
+ 
+    // Calls the function with path as argument
+    // If the file/directory exists at the path returns 0
+    // If block executes if path exists
+    if (stat(dir, &sb) == 0)
+    {
+    }
+    else
+    {
+        cout << "Directory 'Outputs' does not exist! Create 'Outputs' directory: mkdir -p Outputs. Exiting now ...\n";
+    	exit(0);
+    }
+ 
+    return;
+}
 
-	std::feclearexcept(FE_OVERFLOW);
-	std::feclearexcept(FE_UNDERFLOW);
-	// TESTING AREA
-
-	int load_save_switch = 0;
-	int reweight_switch = 1;
-
-	// END OF TESTING AREA
-
+void read_input_file(){
 	std::size_t found;
-
-	double As_modifier = 1;
-	alpha = 4.1;
-	beta = 3.7;
-	Dmid = 60.0;
-	As = 1e6 * 1e-7 * 1e3; // J kg-1 - Using Krivov et al. (2006)
-
-	Bs = -0.24;
-	pericenter_index = -1.3;
-
 	std::ifstream file("input.in");
 	if (file.is_open())
 	{
@@ -2653,8 +2229,12 @@ int main(int argc, char **argv)
 				load_save_switch = stoi(str);
 			if (input_cntr == 10)
 				reweight_switch = stoi(str);
+			if (input_cntr == 11)
+				check_radar = stoi(str);
+			if (input_cntr == 12)
+				check_Earth_Mass = stoi(str);
 
-			// ::cout << str << input_cntr << "\n";
+			// Add checks if the inputs are within boundaries
 			input_cntr++;
 		}
 	}
@@ -2663,56 +2243,104 @@ int main(int argc, char **argv)
 		::cout << "File not found! \t "
 			   << "input.in"
 			   << "\n";
+		::cout << "Create and input,in file based on the template and run the code again. Exiting now ...\n";
+    	exit(0);
 	}
 
 	initial_weight = intended_cloud_area;
-	load_radar_constraints();
-
 	As = As * As_modifier;
 
-	// pericenter_index = 0.0;
 
-	Dmax = 3000.0;
-	N0 = 1.0;
-	// float As = 2e5; // erg g-1
+}
 
-	particle_density = 2000; // kg m^-3
+
+void prepare_iteration() {
+
+		My_Outputs.mass_accreted_at_Earth = 0.0;
+		std::fill(ecl_profile.begin(), ecl_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
+		std::fill(ecl_profile_mass.begin(), ecl_profile_mass.end(), 0);		  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
+		std::fill(SFD_profile.begin(), SFD_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
+		std::fill(SFD_profile_Kessler.begin(), SFD_profile_Kessler.end(), 0); // Fills the ecliptic latitude profile with zeros before we start putting numbers there
+		std::fill(r_prof_brightness.begin(), r_prof_brightness.end(), 0);	  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
+
+		if(check_radar) { initialize_radar_measurements(); }
+
+		::cout << "Before iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
+}
+
+void wrapup_iteration() {
+		checkRadialProfile(pFile, r_prof_iter, iter_count);
+		::fprintf(pFile, "\n");
+		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);
+		::fprintf(pFile1, "\n");
+		checkSFDProfile(pFile2, SFD_profile, iter_count);
+		::fprintf(pFile2, "\n");
+
+		if(check_radar){
+		write_radar_profile(pFile3, iter_count, "CMOR");
+		::fprintf(pFile3, "\n");
+		write_radar_profile(pFile4, iter_count, "AMOR");
+		::fprintf(pFile4, "\n");
+		}
+
+		if (output_switch == 1)
+		{
+			Print_Outputs_Big(grid3Ddata, iter_count, 1.0);
+		}
+		Print_Outputs_Small(grid3Ddata, iter_count, 1.0);
+		Zero_Outputs(grid3Ddata);
+		std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin());
+		std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
+}
+
+int main(int argc, char **argv)
+{
+	std::feclearexcept(FE_OVERFLOW);
+	std::feclearexcept(FE_UNDERFLOW);
+	
+
+	double radial_difference = 1.0;
+
+	check_directories(); // Check if the Outputs directory exists
+	read_input_file();
+
+	if(check_radar) { load_radar_constraints(); }
 
 	std::cout << "Fitting parameters: alpha = " << alpha << ", beta = " << beta << ", Dmid = " << Dmid << ",As = " << As << ", Bs = " << Bs << ", Intended Cloud Area: " << intended_cloud_area << "\n";
 	std::cout << "Fitting parameters: pericenter_index = " << pericenter_index << ", Output_Switch = " << output_switch << "\n";
-	// Parameters
 
-	peterito = new Grid3D(Vec3(10.0, 10.0, 10.0), Vec3(0.05, 0.05, 0.05));
-	double finish_critetion = 1e-2;
+	// Initialize the 3D grid structure
+	grid3Ddata = new Grid3D(Vec3(settings_grid_half_size, settings_grid_half_size, settings_grid_half_size), settings_dr);
 
-	// return 0;
 
-	// Variables
-	double radial_difference = 1.0;
-	double T;
-	int iter_count = 0;
-	float tree_difference = 1.0;
-
-	std::string line;
 
 	pFile = fopen(cradial_file, "w+");
 	pFile1 = fopen(cecl_file, "w+");
-	pFile2 = fopen("Outputs_SFD_profile.out", "w+");
-	pFile3 = fopen("Outputs_Radar_Profiles_CMOR.out", "w+");
-	pFile4 = fopen("Outputs_Radar_Profiles_AMOR.out", "w+");
-	// pFile666 = fopen ("TEST_probabilities","w+");
+	pFile2 = fopen("./Outputs/Outputs_SFD_profile.out", "w+");
+	
+	if(check_radar) {
+	pFile3 = fopen("./Outputs/Outputs_Radar_Profiles_CMOR.out", "w+");
+	pFile4 = fopen("./Outputs/Outputs_Radar_Profiles_AMOR.out", "w+");
+	}
 
+	if(check_Earth_Mass) {
+	pFile5 = fopen("./Outputs/Outputs_Mass_Accreted", "w+");
+	}
+
+	// Start iteration timer
 	double start = stopwatch();
 
 	pre_init();
 	calculate_SFD(alpha, beta, Dmid, Dmax, N0);
 
+	// Print out the size-frequency distribution
+	std::cout << "------" << std::endl << "Printing the size-frequency distribution" << std::endl;
 	for (int i = 0; i < (int)SFD_array.size(); i++)
 	{
 		std::printf("%d, Diameter: %.f, SFD Number: %13.5e, Intergration particle count: %13.5e\n", i, SFD_array[i][0], SFD_array[i][1], Integration_Setup_array[i][1]);
 	}
 
-	Initialize_Outputs();
+	Initialize_Outputs(grid3Ddata);
 	Initiate_Output_Files();
 
 	if (load_save_switch != 1)
@@ -2722,186 +2350,109 @@ int main(int argc, char **argv)
 
 	if (load_save_switch == 1)
 	{
-		initial_weight = peterito->load_grid3D("test_grid3D.bin");
+		initial_weight = grid3Ddata->load_grid3D("test_grid3D.bin");
 		::cout << "GRID SUCCESSFULLY LOADED!!!!!" << std::endl;
-
-		// calculate_collisional_lifetime_map();
-		// // calculate_collisional_lifetime_plot();
-		// return 1;
 	}
 
-	T = stopwatch() - start;
-	::printf("Time-elapsed Init: %.5f - total number of particles loaded: %d\n", T, total_number_of_particles_integration);
+	timer = stopwatch() - start;
+	::printf("Time-elapsed Init: %.5f - total number of particles loaded: %d\n", timer, total_number_of_particles_integration);
 	start = stopwatch();
 	::fflush(stdout); // Timer
 
+
 	float zody_area;
 	float zody_mass;
-	float Earth_mass;
+	// float Earth_mass;
+
+	// -----ITERATIONS SECTION -----
+	// ------------------------------
 
 	// While loop for iterations - finishes when the finish_criterion is reached
 	while (radial_difference > finish_critetion)
 	{
-		// while(tree_difference>finish_critetion) {
+		prepare_iteration();
 
-		mass_accreted_at_Earth = 0.0;
-		tree_difference = 0.0;
-		std::fill(ecl_profile.begin(), ecl_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-		std::fill(ecl_profile_mass.begin(), ecl_profile_mass.end(), 0);		  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-		std::fill(SFD_profile.begin(), SFD_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-		std::fill(SFD_profile_Kessler.begin(), SFD_profile_Kessler.end(), 0); // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-		std::fill(r_prof_brightness.begin(), r_prof_brightness.end(), 0);	  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-
-		// ::cout << "T1 " << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
-
-		initialize_radar_measurements();
-
-		// ::cout << My_Constraints.CMOR_AH_a_x.size() << "\t" << My_Constraints.CMOR_AH_a_y.size() << "\t" << My_Constraints.CMOR_AH_ecc_x.size() << "\t" << My_Constraints.CMOR_AH_ecc_y.size() << "\n";
-		// ::cout << My_Measurements.CMOR_AH_a_x.size() << "\t" << My_Measurements.CMOR_AH_a_y.size() << "\t" << My_Measurements.CMOR_AH_ecc_x.size() << "\t" << My_Measurements.CMOR_AH_ecc_y.size() << "\n";
-
-		::cout << "Before iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
 		iteration(radial_difference);
+
 		::cout << "After iteration - area profile sum: " << compute_sum(ecl_profile) << ", mass profile sum: " << compute_sum(ecl_profile_mass) << std::endl;
-		normalize_radar_measurements();
-		::printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
+		if(check_radar) { normalize_radar_measurements(); }
+		if(check_Earth_Mass) { ::printf("Mass accreted at Earth: %13.5e \n", My_Outputs.mass_accreted_at_Earth); }
 
-		// 	for (int i=0;i<My_Measurements.CMOR_AH_a_y.size(); ++i){
-		// 	::printf("RADAR CHECK --- %.5f %13.5e %.5f %13.5e %.5f %13.5e %.5f %13.5e %d \n",
-		// 		My_Constraints.CMOR_AH_a_x[i], My_Measurements.CMOR_AH_a_y[i],
-		// 		My_Constraints.CMOR_AH_ecc_x[i], My_Measurements.CMOR_AH_ecc_y[i],
-		// 		My_Constraints.CMOR_AH_inc_x[i], My_Measurements.CMOR_AH_inc_y[i],
-		// 		My_Constraints.CMOR_AH_vg_x[i], My_Measurements.CMOR_AH_vg_y[i],
-		// 		iter_count );
-		// }
-
-		// pfileTEST = fopen ("TEST_probability","w+");
-		// for(int TEST_I=0; TEST_I < TEST_probabilities.size(); TEST_I++){
-		// ::fprintf(pfileTEST,"%15.7e\n",TEST_probabilities[TEST_I]);
-		// 	}
-		// return 1;
 		iter_count += 1;
-		// radial_difference = getRadialDifference(r_prof_init,r_prof_iter);
-		radial_difference = peterito->get_the_iteration_difference();
+
+		radial_difference = grid3Ddata->get_the_iteration_difference();
 		::cout << "Radial Difference New " << radial_difference << std::endl;
 		radial_difference = getRadialDifference(r_prof_init, r_prof_iter);
-		::cout << "Radial Difference Oold " << radial_difference << std::endl;
+		::cout << "Radial Difference Old " << radial_difference << std::endl;
 
 		::printf("\n ---------------------- \n");
 
 		zody_area = calculate_cloud_area();
 		zody_mass = calculate_cloud_mass();
 
-		T = stopwatch() - start;
-		::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n", iter_count, T, radial_difference, zody_area, zody_mass);
+		timer = stopwatch() - start;
+
+		::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n", iter_count, timer, radial_difference, zody_area, zody_mass);
+		
+
 		start = stopwatch();
+		
 		::printf("---------------------- \n");
 		::fflush(stdout);
-		checkRadialProfile(pFile, r_prof_iter, iter_count);
-		::fprintf(pFile, "\n");
-		checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);
-		::fprintf(pFile1, "\n");
-		checkSFDProfile(pFile2, SFD_profile, iter_count);
-		::fprintf(pFile2, "\n");
-		write_radar_profile(pFile3, iter_count, "CMOR");
-		::fprintf(pFile3, "\n");
-		write_radar_profile(pFile4, iter_count, "AMOR");
-		::fprintf(pFile4, "\n");
-		if (output_switch == 1)
-		{
-			Print_Outputs_Big(iter_count);
-		}
-		Print_Outputs_Small(iter_count);
-		Zero_Outputs();
-		std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin());
-		std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
+
+		wrapup_iteration();
 	}
-	::fclose(pFile);
-	::fclose(pFile1);
-	::fclose(pFile2);
-	::fclose(pFile3);
-	::fclose(pFile4);
 
-	pFile4 = fopen("Outputs_Mass_Accreted", "w+");
-	std::vector<double> mass_vector;
-	calculate_Earth_Mass_Flux(mass_vector, iter_count);
-	::fclose(pFile4);
 
-	// float zody_area = compute_sum(ecl_profile);
-	// float zody_mass = compute_sum(ecl_profile_mass);
+	// std::vector<double> mass_vector;	
+	// if(check_Earth_Mass) {
+	// 	calculate_Earth_Mass_Flux(mass_vector, iter_count);
+	// 	Earth_mass = compute_average(mass_vector);
+	// }
 
 	zody_area = calculate_cloud_area();
 	zody_mass = calculate_cloud_mass();
-	Earth_mass = compute_average(mass_vector);
 
 	float ratio1 = zody_area / intended_cloud_area;
-	float ratio2 = zody_mass / 4e16;
-	float ratio3 = Earth_mass / 4e4;
+
 	float reweight_factor = 9e9;
-
-	float estimate1;
-	float estimate2;
-	float estimate3;
-	std::vector<float> estimate_vec;
-
-	// // A more sophisticated way of reweighting - for now we reweight just to match the Zody Area
-	// estimate1 = abs(log( ratio1/ratio1)) +abs(log( ratio2/ratio1 )) +abs(log( ratio3/ratio1));
-	// estimate2 = abs(log( ratio1/ratio2)) +abs(log( ratio2/ratio2 )) +abs(log( ratio3/ratio2));
-	// estimate3 = abs(log( ratio1/ratio3)) +abs(log( ratio2/ratio2 )) +abs(log( ratio3/ratio2));
-	// estimate_vec = {estimate1,estimate2,estimate3};
-	// if(estimate1 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio1;
-	// if(estimate2 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio2;
-	// if(estimate3 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio3;
-
-	// if(ratio1 < 1.0) {reweight_factor = abs(ratio1-1.0)}
 	reweight_factor = 1.0 / ratio1;
-	// reweight_factor =  exp( ( log(ratio1)+log(ratio2)+log(ratio3) ) / (-3.0)) ; // OLD REWEIGHT
-	// float quality_factor = std::max(zody_area/2e17,pow(zody_area/2e17,-1))*std::max(zody_mass/4e16,pow(zody_mass/4e16,-1))*std::max(Earth_mass/4e4,pow(Earth_mass/4e4,-1));
-	// float quality_factor = pow(log( ratio1),2) + pow(log( ratio2),2) + pow(log( ratio3),2); // OLD QUALITY
-	float quality_factor = abs(log(ratio1)) + abs(log(ratio2)) + abs(log(ratio3));
 
-	::cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: " << quality_factor << ", Reweight Factor: " << reweight_factor << "\n";
+	::cout << "Zody Cross-Section: " << zody_area << ", Zody Mass: " << zody_mass;
+	if(check_Earth_Mass) {:: cout << ", Earth Mass: " << My_Outputs.mass_accreted_at_Earth; };
+	::cout << ", Reweight Factor: " << reweight_factor << "\n";
+
+	// -----REWEIGHTING SECTION -----
+	// ------------------------------
 
 	if (reweight_switch == 1)
 	{
+		::cout << "Reweighting is active - entering the reweight iteration loop" << ::endl;
 		while (pow(log(reweight_factor), 2.0) > 0.009085)
 		{ // reweighing factor is less than 10%
 
-			// init(); // Initialize the seed model
 			initial_weight = reweight_factor * initial_weight;
-
 			radial_difference = 1.0;
 			iter_count += 100;
 
 			::printf("\n ---------------------- \n");
 			::cout << "Recalculating the initial weight: " << initial_weight << ", reweighting factor: " << reweight_factor << "\n";
-			peterito->multiplyAllWeights(reweight_factor);
+			grid3Ddata->multiplyAllWeights(reweight_factor);
 			::printf("\n ---------------------- \n");
-
-			pFile = fopen(cradial_file, "a+");
-			pFile1 = fopen(cecl_file, "a+");
-			pFile2 = fopen("Outputs_SFD_profile.out", "a+");
-			pFile3 = fopen("Outputs_Radar_Profiles_CMOR.out", "a+");
-			pFile4 = fopen("Outputs_Radar_Profiles_AMOR.out", "a+");
 
 			while (radial_difference > finish_critetion)
 			{
-				// while(tree_difference>finish_critetion) {
-				tree_difference = 0.0;
-				mass_accreted_at_Earth = 0.0;
-				std::fill(ecl_profile.begin(), ecl_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-				std::fill(ecl_profile_mass.begin(), ecl_profile_mass.end(), 0);		  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-				std::fill(SFD_profile.begin(), SFD_profile.end(), 0);				  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-				std::fill(SFD_profile_Kessler.begin(), SFD_profile_Kessler.end(), 0); // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-				std::fill(r_prof_brightness.begin(), r_prof_brightness.end(), 0);	  // Fills the ecliptic latitude profile with zeros before we start putting numbers there
-				initialize_radar_measurements();
+				prepare_iteration();
 
 				iteration(radial_difference);
-				normalize_radar_measurements();
 
-				::printf("Mass accreted at Earth: %13.5e \n", mass_accreted_at_Earth);
+				if(check_radar) { normalize_radar_measurements(); }
+
+				if(check_Earth_Mass) { ::printf("Mass accreted at Earth: %13.5e \n", My_Outputs.mass_accreted_at_Earth); }
+
 				iter_count += 1;
 				// radial_difference = getRadialDifference(r_prof_init,r_prof_iter);
-				radial_difference = peterito->get_the_iteration_difference();
+				radial_difference = grid3Ddata->get_the_iteration_difference();
 				::cout << "Radial Difference New " << radial_difference << std::endl;
 				radial_difference = getRadialDifference(r_prof_init, r_prof_iter);
 				::cout << "Radial Difference Oold " << radial_difference << std::endl;
@@ -2909,82 +2460,62 @@ int main(int argc, char **argv)
 				zody_area = calculate_cloud_area();
 				zody_mass = calculate_cloud_mass();
 
-				T = stopwatch() - start;
-				::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n", iter_count, T, radial_difference, zody_area, zody_mass);
+				timer = stopwatch() - start;
+				::printf("Time-elapsed Iter %d: %.5f, Radial difference: %.5e, Zody area: %.5e, Zody mass %.5e \n", iter_count, timer, radial_difference, zody_area, zody_mass);
 				start = stopwatch();
 				::printf("---------------------- \n");
 				::fflush(stdout);
-				checkRadialProfile(pFile, r_prof_iter, iter_count);
-				::fprintf(pFile, "\n");
-				checkEclipticProfile(pFile1, ecl_profile, ecl_profile_mass, iter_count);
-				::fprintf(pFile1, "\n");
-				checkSFDProfile(pFile2, SFD_profile, iter_count);
-				::fprintf(pFile2, "\n");
-				write_radar_profile(pFile3, iter_count, "CMOR");
-				::fprintf(pFile3, "\n");
-				write_radar_profile(pFile4, iter_count, "AMOR");
-				::fprintf(pFile4, "\n");
-				std::copy(r_prof_iter.begin(), r_prof_iter.end(), r_prof_init.begin());
-				std::fill(r_prof_iter.begin(), r_prof_iter.end(), 0); // Copy the r_prof_iter to r_prof_init and put zeros to r_prof_iters
-				if (output_switch == 1)
-				{
-					Print_Outputs_Big(iter_count);
-				}
-				Print_Outputs_Small(iter_count);
-				Zero_Outputs();
+				wrapup_iteration();
 			}
-			::fclose(pFile);
-			::fclose(pFile1);
-			::fclose(pFile2);
-			::fclose(pFile3);
-			::fclose(pFile4);
 
-			pFile4 = fopen("Outputs_Mass_Accreted", "a+");
-			mass_vector.clear();
-			calculate_Earth_Mass_Flux(mass_vector, iter_count);
-			::fclose(pFile4);
 
-			zody_area = calculate_cloud_area();
-			zody_mass = calculate_cloud_mass();
-			Earth_mass = compute_average(mass_vector);
 
-			ratio1 = zody_area / intended_cloud_area;
-			ratio2 = zody_mass / 4e16;
-			ratio3 = Earth_mass / 4e4;
-			// float quality_factor = std::max(zody_area/2e17,pow(zody_area/2e17,-1))*std::max(zody_mass/4e16,pow(zody_mass/4e16,-1))*std::max(Earth_mass/4e4,pow(Earth_mass/4e4,-1));
-			// quality_factor = pow(log( ratio1),2) + pow(log( ratio2),2) + pow(log( ratio3),2);
-			quality_factor = abs(log(ratio1)) + abs(log(ratio2)) + abs(log(ratio3));
+		// if(check_Earth_Mass) {
+		// 	mass_vector.clear();
+		// 	calculate_Earth_Mass_Flux(mass_vector, iter_count);
+		// 	Earth_mass = compute_average(mass_vector);
+		// }
 
-			::cout << "Area: " << ratio1 << ", Zody Mass: " << ratio2 << ", Earth Mass: " << ratio3 << ", Quality factor: " << quality_factor << "\n";
-			// reweight_factor =  exp( ( log(ratio1)+log(ratio2)+log(ratio3) ) / (-3.0)) ;
+		zody_area = calculate_cloud_area();
+		zody_mass = calculate_cloud_mass();
+		
 
-			// estimate1 = abs(log( ratio1/ratio1)) +abs(log( ratio2/ratio1 )) +abs(log( ratio3/ratio1));
-			// estimate2 = abs(log( ratio1/ratio2)) +abs(log( ratio2/ratio2 )) +abs(log( ratio3/ratio2));
-			// estimate3 = abs(log( ratio1/ratio3)) +abs(log( ratio2/ratio2 )) +abs(log( ratio3/ratio2));
-			// estimate_vec = {estimate1,estimate2,estimate3};
-			// if(estimate1 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio1;
-			// if(estimate2 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio2;
-			// if(estimate3 == *min_element(estimate_vec.begin(),estimate_vec.end())) reweight_factor = 1.0/ratio3;
-			reweight_factor = 1.0 / ratio1;
+		float ratio1 = zody_area / intended_cloud_area;
+
+		reweight_factor = 1.0 / ratio1;
+
+		::cout << "Zody Cross-Section: " << zody_area << ", Zody Mass: " << zody_mass;
+		if(check_Earth_Mass) {:: cout << ", Earth Mass: " << My_Outputs.mass_accreted_at_Earth;}
+		::cout << ", Reweight Factor: " << reweight_factor << "\n";
 		}
 	}
+
+
+	::cout << "Done with all iterations! \n";
+	::fclose(pFile);
+	::fclose(pFile1);
+	::fclose(pFile2);
+	if(check_radar) {
+	::fclose(pFile3);
+	::fclose(pFile4);
+	}
+	if(check_Earth_Mass) { ::fclose(pFile5); }
+
+
 	pFile = fopen("Fitting_Parameters.results", "a+");
-	::fprintf(pFile, "alpha: %7.3f\t beta: %7.3f\t Dmid: %8.3f\t As_mod: %7.3f\t Bs: %7.3f\t Initial_Weight: %13.5e\t Reweight_factor: %8.3f\t Quality_Factor: %7.3f, Ratios: %7.3f\t%7.3f\t%7.3f\n", alpha, beta, Dmid, As_modifier, Bs, initial_weight, reweight_factor, quality_factor, ratio1, ratio2, ratio3);
+	::fprintf(pFile, "alpha: %7.3f\t beta: %7.3f\t Dmid: %8.3f\t As_mod: %7.3f\t Bs: %7.3f\t Initial_Weight: %13.5e\t Reweight_factor: %8.3f\n", alpha, beta, Dmid, As_modifier, Bs, initial_weight, reweight_factor);
 	::fclose(pFile);
 
-	std::cout << "Calculation check: Overflow flag: " << (bool)std::fetestexcept(FE_OVERFLOW) << "Underflow flag: " << (bool)std::fetestexcept(FE_UNDERFLOW) << std::endl;
+	::cout << "Calculation check: Overflow flag: " << (bool)std::fetestexcept(FE_OVERFLOW) << ", Underflow flag: " << (bool)std::fetestexcept(FE_UNDERFLOW) << std::endl;
 
 	//
 	if (load_save_switch == 2)
 	{
-		peterito->save_grid3D("test_grid3D.bin",initial_weight);
+		::cout << "Saving the entire 3Ddata grid to a file: test_grid3D.bin" << ::endl;
+		grid3Ddata->save_grid3D("test_grid3D.bin",initial_weight);
 	}
 
+	::cout << "---- SUCCESS - Everything ran as planned! ----" << ::endl;
 	return 0;
 }
 
-// NOTES
-// tau_coll=n_par * sigma_par * deltaV * t_record
-// w_new = w*exp(-tau_coll)
-// t_pr = 400*(M_sun/M_star)*pow(r_orig/au,2)/beta
-// beta = 5.7e-5/rho/particle_radius*L_star/L_sun*M_sun/M_star

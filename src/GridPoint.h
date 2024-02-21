@@ -46,7 +46,7 @@ public:
 	inline void addRecord(){rec_num+=1;}
 
 	// Prints out everything that is stored in the k-th position of the GridPoint
-	inline void printReport(int k) {printf("x = %f, y = %f, z = %f, vx = %f, vy = %f, vz = %f, weight: %f, weight_iter: %f, SFD_index: %d\n", position.x,position.y,position.z,velocity[k].x,velocity[k].y,velocity[k].z,weight[k],weight_iter[k],SFD_index[k]);}
+	inline void printReport(int k) {std::printf("x = %f, y = %f, z = %f, vx = %f, vy = %f, vz = %f, weight: %f, weight_iter: %f, SFD_index: %d\n", position.x,position.y,position.z,velocity[k].x,velocity[k].y,velocity[k].z,weight[k],weight_iter[k],SFD_index[k]);}
 
 
 };

@@ -109,16 +109,16 @@ namespace petrpokorny
 						{
 							if (data[i][j][k].getWeight(kk) < 0)
 							{
-								printf("Aborting program: Problem with checking weights in the 3D grid: Pre-iter weight is %13.5e and should be non-negative\n\
+								::printf("Aborting program: Problem with checking weights in the 3D grid: Pre-iter weight is %13.5e and should be non-negative\n\
 								Debug info: x = %d, y = %d, z = %d, record number = %d", data[i][j][k].getWeight(kk), i,j,k,kk);
-								fflush(stdout);
+								::fflush(stdout);
 								abort();
 							}
 							if (data[i][j][k].getWeight_Iter(kk) < 0)
 							{
-								printf("Aborting program: Problem with checking weights in the 3D grid: Post-iter weight is %13.5e and should be non-negative\n\
+								::printf("Aborting program: Problem with checking weights in the 3D grid: Post-iter weight is %13.5e and should be non-negative\n\
 								Debug info: x = %d, y = %d, z = %d, record number = %d", data[i][j][k].getWeight_Iter(kk), i,j,k,kk);
-								fflush(stdout);
+								::fflush(stdout);
 								abort();
 							}
 						}
@@ -146,10 +146,10 @@ namespace petrpokorny
 							float new_weight = data[i][j][k].getWeight(kk) * (D_weight) + data[i][j][k].getWeight_Iter(kk) * (1.0 - D_weight);
 							if (new_weight < 0)
 							{
-								printf("Aborting program: Problem with setting weights between iterations: w1: %13.5e, w2: %13.5e, wtot: %13.5e \n\
+								::printf("Aborting program: Problem with setting weights between iterations: w1: %13.5e, w2: %13.5e, wtot: %13.5e \n\
 								Debug info: x = %d, y = %d, z = %d, record number = %d", \
 								data[i][j][k].getWeight_Iter(kk),data[i][j][k].getWeight(kk), new_weight, i, j, k, kk);
-								fflush(stdout);
+								::fflush(stdout);
 								abort();
 							}
 							
@@ -229,7 +229,7 @@ namespace petrpokorny
 		float get_the_iteration_difference()
 		{
 			int rec_iter;
-			double log_diff;
+			double log_diff = 1.0;
 			double max_log_diff = 0.0;
 			for (int i = 0; i < (int)data.size(); i++)
 			{
@@ -312,7 +312,7 @@ namespace petrpokorny
 			ofstream file(data_filename, ios::out | ios::binary);
 			if (!file)
 			{
-				cout << "Function: save_grid3d - Cannot open file: " << data_filename << endl;
+				::cout << "Function: save_grid3d - Cannot open file: " << data_filename << endl;
 				abort();
 			}
 
@@ -346,14 +346,12 @@ namespace petrpokorny
 		// Loads the entire 3D grid file from data_filename
 		double load_grid3D(string data_filename)
 		{
-			char pink;
-			int record_counter = 0;
 			double initial_weight;
 			ifstream file(data_filename, ios::in | ios::binary);
 			
 			if (!file)
 			{
-				cout << "Function: load_grid3D - Cannot open file: " << data_filename << endl;
+				::cout << "Function: load_grid3D - Cannot open file: " << data_filename << endl;
 				abort();
 			}
 
