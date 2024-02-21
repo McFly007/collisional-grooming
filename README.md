@@ -1,8 +1,8 @@
 # Collisional Grooming Code
 ### by Petr Pokorny
 
-Reference: Pokorny et al. (2024) - https://arxiv.org/abs/2401.13776
-Contact: Petr Pokorny at The Catholic University of America / NASA Goddard Space Flight Center
+ Reference: Pokorny et al. (2024) - https://arxiv.org/abs/2401.13776
+ Contact: Petr Pokorny at The Catholic University of America / NASA Goddard Space Flight Center
 
 ---
 
