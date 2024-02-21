@@ -1,5 +1,7 @@
-#Collisional Grooming Code 
+#Collisional Grooming Code
+
 by Petr Pokorny
+
 Reference: Pokorny et al. (2024) - https://arxiv.org/abs/2401.13776
 
 ---
