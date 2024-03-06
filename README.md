@@ -11,9 +11,9 @@ The main purpose of this code is to calculate the effects of collisions on parti
 ### How to start
 1. Clone this repository: git clone https://github.com/McFly007/collisional-grooming
 2. Run make file: make
-3. Download data files from Zenodo: link will appear soon here
+3. Download data files from Zenodo: https://zenodo.org/records/10553976
 4. Run the coll_groom file
-5. Done
+5. Enjoy
 
 ---
 Note: The documentation and the code is being actively updated. The current version works on all cases shown in the article published in the Planetary Science Journal. 
